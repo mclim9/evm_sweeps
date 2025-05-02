@@ -77,3 +77,5 @@ class option_functions():
 if __name__ == '__main__':
     林 = option_functions()
     林.get_info()
+    林.get_ACLR()
+    林.get_EVM()
