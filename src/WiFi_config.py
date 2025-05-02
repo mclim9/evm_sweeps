@@ -12,7 +12,7 @@ class config():
         self.VSA.query('*RST;*OPC?')                            # Reset
         self.VSA.query(':SYST:DISP:UPD ON; *OPC?')              # Display on
         self.VSA.query(':INST:CRE:NEW WLAN, "WLAN"; *OPC?')     # Start 5GNR6
-        self.VSA.write(':INIT:CONT OFF')                        # Single Sweep
+        self.VSA.write(':INIT:CONT ON')                        # Single Sweep
         self.VSA.write(':CONF:STAN 11')                         # 11:be
         self.VSA.write(':SENS:SWE:TIME 0.002')                  # Sweep Time
         self.VSA.write(':SENS:DEM:TXAR OFF')                    # Burst Search
@@ -20,11 +20,12 @@ class config():
         # self.VSA.write(':SENS:DEM:CEST:PAYL 0')               # ChEst Payload
         # self.VSA.write(':SENS:DEM:CEST:RANG PRE2T')           # ChEst PRE1T(Preamble) PRE1T(Data)
         self.VSA.write(':SENS:DEM:INT:WIEN:DSPR:STAT MANUAL')   # Wiener Filter
-        self.VSA.write(':SENS:DEM:INT:WIEN:DSPR 0.03')          # Wiener Filter
+        self.VSA.write(':SENS:DEM:INT:WIEN:DSPR 3.00')          # Wiener Filter
         # self.VSA.write(':SENS:BAND:CHAN:AUTO:TYPE MB320')     # Meas 320MHz
         # self.VSA.write('CONF:WLAN:RUC:SEGM1:CHAN1:RUL1:USER1:MCS 13')
 
-        self.VSA.write(':LAY:REPL:WIND "3",RSDetailed')         # Detailed Result Summary
+        # self.VSA.write(':LAY:REPL:WIND "3",RSDetailed')         # Detailed Result Summary
+        self.VSA.clear_error()
 
     def VSA_Load(self, file):
         self.VSA.write(f':MMEM:LOAD:DEM:C1 "{file}"')
@@ -55,7 +56,7 @@ class config():
         self.VSG.write(f':SOUR1:BB:WLNN:FBL1:TMOD EHT320')          # Tx Mode
         self.VSG.write(f':SOUR1:BB:WLNN:FBL1:USER1:MCS MCS13')      # MCS
         self.VSG.write(f':SOUR1:BB:WLNN:FBL1:USER1:RUTY RU4996')    # RU Config
-        self.VSG.write(f':SOUR1:BB:WLNN:FBL1:USER1:MPDU1:COUN 10')  # Num MPDU
+        self.VSG.write(f':SOUR1:BB:WLNN:FBL1:USER1:MPDU1:COUN 50')  # Num MPDU
         self.VSG.write(f':SOUR1:BB:WLNN:FBL1:GUAR GD08')            # Guard Duration
         self.VSG.write(f':SOUR1:BB:WLNN:FBL1:SYMD SD64')            # Symbol Duration
         self.VSG.write(f':SOUR1:BB:WLNN:FBL1:ITIM 0')               # Idle Time
@@ -66,6 +67,7 @@ class config():
         self.VSG.write(f':OUTP1:STAT 1')                        # RF On
         self.VSG.query(':SOUR1:CORR:OPT:EVM 1;*OPC?')           # Optimize EVM
         self.VSG.write(':SOUR1:BB:WLNN:TRIG:OUTP1:MODE REST')   # Maker Mode Arb Restart
+        self.VSG.clear_error()
 
     def VSG_save_state(self):
         """VSG Save 5G State"""
@@ -90,6 +92,6 @@ if __name__ == '__main__':
     林 = config()
     林.VSG_Config()
     林.VSA_Config()
-    林.set_freq(2e9)
+    林.set_freq(7e9)
     # 林.VSG_save_state()
     # 林.VSA_save_state()

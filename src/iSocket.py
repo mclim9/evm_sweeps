@@ -16,7 +16,7 @@ class iSocket():
         num_error = 0
         for i in range(10):
             rdStr = self.query('SYST:ERR?')
-            print(rdStr)
+            print(f'Error: {rdStr}')
             errorCode = rdStr.split(',')[0]
             if errorCode == '0':
                 break

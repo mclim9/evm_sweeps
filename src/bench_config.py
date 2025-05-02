@@ -35,8 +35,13 @@ class bench():
         self.VSA.write(f':SENS:FREQ:CENT {freq}')
         self.VSG.write(f':SOUR1:FREQ:CW {freq}')
 
+    def set_inst_off(self):
+        self.VSA.write(f':SYST:SHUT')
+        self.VSG.write(f':SYST:SHUT')
+
 if __name__ == '__main__':
     林 = bench()
     林.bench_verify()
     # 林.VSG_network_reset()
     林.set_freq(2e9)
+    # 林.set_inst_off()
