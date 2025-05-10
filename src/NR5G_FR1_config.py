@@ -12,11 +12,16 @@ class config():
         self.VSA.query('*RST;*OPC?')                            # Reset
         self.VSA.query(':SYST:DISP:UPD ON; *OPC?')              # Display on
         self.VSA.query(':INST:CRE:NEW NR5G, "5G NR"; *OPC?')    # Start 5GNR6
-        self.VSA.write(f':CONF:GEN:IPC:ADDR "{bench().VSG_IP}"')# Gen IP
-        self.VSA.query(':CONF:GEN:CONN:STAT ON; *OPC?')         # Gen Connect
-        self.VSA.query(':CONF:GEN:CONT:STAT ON; *OPC?')         # Gen Control State
-        self.VSA.query(':CONF:GEN:RFO:STAT ON; *OPC?')          # Gen RF State
-        self.VSA.query(':CONF:SETT:NR5G; *OPC?')                # Get 5G Settings
+        self.VSA.write(':CONF:NR5G:LDIR UL')                    # Link Direction
+        self.VSA.write(':CONF:NR5G:UL:CC1:DFR MIDD')            # Band
+        self.VSA.write(':CONF:NR5G:UL:CC1:BW BW100')            # BW
+        self.VSA.write(':CONF:NR5G:UL:CC1:FRAM1:BWP0:SSP SS30') # SCS
+        self.VSA.write(':CONF:NR5G:UL:CC1:FRAM1:BWP0:CSL 1')    # User Config Slot
+        self.VSA.write(':CONF:NR5G:UL:CC1:FRAM1:BWP0:RBC 270')  # BWP RB
+        self.VSA.write(':CONF:NR5G:UL:CC1:FRAM1:BWP0:RBOF 0')   # BWP RB Offset
+        self.VSA.write(':CONF:NR5G:UL:CC1:FRAM1:BWP0:SLOT0:ALL0:RBOF 0')
+        self.VSA.write(':CONF:NR5G:UL:CC1:FRAM1:BWP0:SLOT0:ALL0:RBC 270')
+        self.VSA.write(':CONF:NR5G:UL:CC1:FRAM1:BWP0:SLOT0:ALL0:MOD QAM256')
 
         # Additional Settings
         self.VSA.write(':TRIG:SEQ:SOUR EXT')                    # Trigger External
@@ -25,7 +30,7 @@ class config():
         self.VSA.write(':SENS:NR5G:FRAM:SLOT 1')                # Single Slot
         self.VSA.write(':UNIT:EVM DB')                          # EVM Units: DB PCT
         self.VSA.write(':SENS:SWE:TIME 0.0005')                 # Capture Time
-        self.VSA.write(':CONF:NR5G:DL:CC1:RFUC:STAT OFF')       # Phase compensation
+        self.VSA.write(':CONF:NR5G:UL:CC1:RFUC:STAT OFF')       # Phase compensation
 
     def VSA_Load(self, file):
         self.VSA.write(f':MMEM:LOAD:DEM:C1 "{file}"')
@@ -40,6 +45,7 @@ class config():
 
     def VSG_Config(self):
         '''Config w/ SMW 5G Quick Settings'''
+        self.VSG.write(f':SOUR1:BB:NR5G:LINK UP')               # Link Direction
         self.VSG.write(f':SOUR1:BB:NR5G:QCKS:GEN:DUPL FDD')     # FDD TDD
         self.VSG.write(f':SOUR1:BB:NR5G:QCKS:GEN:CARD FR1GT3')  # FR1GT3
         self.VSG.write(f':SOUR1:BB:NR5G:QCKS:GEN:CBW BW100')    # BW50 BW100

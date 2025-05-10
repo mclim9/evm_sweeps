@@ -28,7 +28,7 @@ class plotter():
         for freq in freq_array:
             bathTub = self.df[self.df['Freq'].isin([freq])]         # filter data   | Up Lt
             # df = df[df['lvling'].str.contains('EVM')]             # filter data   | Up Lt
-            self.Cols = ['Freq', 'K575', 'Leveling']                # Split Traces  | Up Rt
+            self.Cols = ['Freq',  'Leveling']                       # Split Traces  | Up Rt
             self.Xval = ['Power [dBm]']                             # X Values      | Dn Lt
             self.Yval = ['EVM[dB]']                                 # Y Values      | Dn Rt
             self.aggg = 'mean'                                      # mean | sum
@@ -41,7 +41,7 @@ class plotter():
         pwr_arry = [-10, 5, 10, 12]
         for setPwr in pwr_arry:
             freqRespData = self.df[self.df['Power [dBm]'].isin([setPwr])]    # filter data   | Up Lt
-            self.Cols = ['K575', 'Leveling', 'Power [dBm]']         # Split Traces  | Up Rt
+            self.Cols = [ 'Leveling', 'Power [dBm]']                # Split Traces  | Up Rt
             self.Xval = ['Freq']                                    # X Values      | Dn Lt
             self.Yval = ['EVM[dB]']                                 # Y Values      | Dn Rt
             self.aggg = 'mean'                                      # mean | sum
@@ -68,7 +68,7 @@ class plotter():
 
     def main(self):
         self.read_data()
-        self.filter_data_freqResp()
+        # self.filter_data_freqResp()
         self.filter_data_bathtub()
 
 if __name__ == '__main__':

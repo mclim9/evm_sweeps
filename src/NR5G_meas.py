@@ -11,10 +11,12 @@ class option_functions():
 
     def get_EVM(self):
         try:
-            EVM = self.VSA.queryFloat(':FETC:CC1:SUMM:EVM:ALL:AVER?')       # VSA CW
+            self.VSA.query('INIT:IMM;*OPC?')                            # Take a sweep
+            EVM = self.VSA.queryFloat(':FETC:CC1:SUMM:EVM:ALL:AVER?')   # VSA CW
         except:
-            self.VSA.query('INIT:IMM;*OPC?')
-            EVM = self.VSA.queryFloat(':FETC:CC1:SUMM:EVM:ALL:AVER?')       # VSA CW
+            print('EVM 2nd Try')
+            self.VSA.query('INIT:IMM;*OPC?')                            # Take a sweep
+            EVM = self.VSA.queryFloat(':FETC:CC1:SUMM:EVM:ALL:AVER?')   # VSA CW
         return EVM
 
     def get_info(self):
@@ -38,25 +40,14 @@ class option_functions():
         print(outStr)
         return outStr
 
+    def get_VSA_attn_reflvl(self):
+        attn = self.VSA.query('INP:ATT?')                               # Input Attn
+        refl = self.VSA.queryFloat('DISP:TRAC:Y:SCAL:RLEV?')            # Ref Level
+        return attn, refl
+
     def get_VSA_chPwr(self):
         chPw = self.VSA.queryFloat(':FETC:CC1:ISRC:FRAM:SUMM:POW?')     # VSA CW Ch Pwr
         return chPw
-
-    def set_VSA_level(self, method):
-        '''# LEV:autolevel EVM:autoEVM'''
-        if 'EVM' in method:
-            self.VSA.query(f':SENS:ADJ:EVM;*OPC?')                      # AutoEVM
-        elif 'LEV' in method:
-            self.VSA.query(f':SENS:ADJ:LEV;*OPC?')                      # Autolevel
-        else:
-            self.VSA.write(f':INP:ATT:AUTO ON')                         # AutoAttenuation
-            pwr = self.get_VSA_chPwr()
-            self.VSA.write(f':DISP:WIND:TRAC:Y:SCAL:RLEV {pwr - 2}')    # Manually set ref level
-
-    def set_freq(self, freq):
-        # self.VSA.write(f':CONF:NR5G:GMCF {freq}')                     # Ana CA Center Freq
-        self.VSA.write(f':SENSE:FREQ:CENT {freq}')                      # Ana CC Center Freq
-        self.VSG.write(f':SOUR1:FREQ:CW {freq}')                        # Generator center freq
 
     def set_VSA_init(self):
         self.VSA.write('INIT:CONT OFF')                                 # Single Sweep
@@ -68,14 +59,42 @@ class option_functions():
         self.VSA.write(':CONF:NR5G:DL:CC1:RFUC:STAT OFF')               # Phase compensation
         # VSA.write(':SENS:NR5G:RSUM:CCR ALL')                          # CA View all CC results
 
+    def set_VSA_level(self, method='LEV'):
+        '''# LEV:autolevel EVM:autoEVM'''
+        if 'EVM' in method:
+            self.VSA.query(f':SENS:ADJ:EVM;*OPC?')                      # AutoEVM
+        elif 'LEV' in method:
+            self.VSA.query(f':SENS:ADJ:LEV;*OPC?')                      # Autolevel
+        else:
+            self.VSA.write(f':INP:ATT:AUTO ON')                         # AutoAttenuation
+            pwr = self.get_VSA_chPwr()
+            self.VSA.write(f':DISP:WIND:TRAC:Y:SCAL:RLEV {pwr - 2}')    # Manually set ref level
+
+    def get_VSA_sweep(self):
+        self.VSA.write('INIT:CONT OFF')
+        self.VSA.query('INIT:IMM;*OPC?')
+
     def set_VSG_init(self):
         self.VSG.write(':SOUR1:CORR:OPT:EVM 1')                         # Optimize EVM
         self.VSG.write(':SOUR1:BB:NR5G:TRIG:OUTP1:MODE REST')           # Maker Mode Arb Restart
         self.VSG.write(':SOUR1:BB:NR5G:NODE:RFPH:MODE 0')               # Phase Compensation Off
+        self.VSG.query('*OPC?')
+
+    def set_VSG_pwr(self, pwr):
+        self.VSG.write(f':SOUR1:POW:POW {pwr}')                         # VSG Power
+
+    def set_VSx_freq(self, freq):
+        # self.VSA.write(f':CONF:NR5G:GMCF {freq}')                     # Ana CA Center Freq
+        self.VSA.write(f':SENSE:FREQ:CENT {freq}')                      # Ana CC Center Freq
+        self.VSG.write(f':SOUR1:FREQ:CW {freq}')                        # Generator center freq
 
 
 if __name__ == '__main__':
     林 = option_functions()
     林.get_info()
-    林.get_ACLR()
-    林.get_EVM()
+    林.set_VSA_init()
+    林.set_VSG_init()
+    EVMM = 林.get_EVM()
+    ACLR = 林.get_ACLR()
+    chPw = 林.get_VSA_chPwr()
+    print(f'EVM:{EVMM:.2f} CH_Pwr:{chPw:.2f} ACLR:{ACLR}')

@@ -102,13 +102,13 @@ class iSocket():
         return sOut
 
     def tick(self):
-        self.ticks = timeit.default_timer()
+        self.tickVal = timeit.default_timer()
 
     def tock(self, comment=''):
-        self.tocks = timeit.default_timer() - self.ticks
+        self.tockVal = timeit.default_timer() - self.tickVal
         if comment != '':
-            print(f'Time : {self.tocks:7.3f} secs {comment}')
-        return self.tocks
+            print(f'Time : {self.tockVal:7.3f} secs {comment}')
+        return self.tockVal
 
     def timeout(self, seconds):
         self.s.settimeout(seconds)

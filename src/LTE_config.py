@@ -12,12 +12,12 @@ class config():
         self.VSA.tick()
         self.VSA.query(f':INST:CRE:NEW LTE, "LTE";*OPC?')               # Opens LTE Mode
         self.VSA.write(f':TRIG:SEQ:SOUR EXT;*WAI')                      # Trigger: IMM|EXT|EXT2|RFP|IFP|TIME|VID|BBP|PSEN
-        self.VSA.write(f':INIT:CONT OFF;*WAI')                          # Continuous sweep: ON|OFF
+        self.VSA.write(f':INIT:CONT ON;*WAI')                           # Continuous sweep: ON|OFF
         self.VSA.write(f':CONF:LTE:DUPL FDD;*WAI')                      # Duplexing:  FDD|TDD
         self.VSA.write(f':CONF:LTE:LDIR UL;*WAI')                       # Link direction: UL|DL
         self.VSA.write(f':CONF:LTE:UL:CC:BW BW5_00;*WAI')               # Channel BW: BW1_40|BW3_00|BW5_00|BW10_00|BW15_00|BW20_00
         self.VSA.write(f':CONF:LTE:UL:CC:SUBF0:ALL:CLUS1:RBC {rbc}')    # Num RB: 0 to 100
-        self.VSA.write(f':CONF:LTE:UL:CC:SUBF0:ALL:CLUS1:RBOF {rbo}')   # RB Offset: 0 to 99
+        self.VSA.write(f':CONF:LTE:UL:CC:SUBF0:ALL:CLUS1:rboF {rbo}')   # RB Offset: 0 to 99
         self.VSA.write(f':CONF:LTE:UL:CC:SUBF0:ALL:MOD QAM256')         # Modulation
         self.VSA.write(f':SENS:SWE:TIME 0.00201;*WAI')                  # Sweep Time: Range: 0.00201s to 0.0501
         self.VSA.write(f':SENS:LTE:FRAM:SSUB ON;*WAI')                  # Single SUbframe Mode: ON|OFF
@@ -35,17 +35,16 @@ class config():
     def VSA_save_state(self):
         """VSA Save State"""
         self.VSA.query(f'*IDN?')
-        Dir  = self.VSA.query(':CONF:LTE:LDIR?')
-        Dupl = self.VSA.query(':CONF:LTE:DUPL?')
-        if Dir == 'UP':
-            Dir  = 'UL'
-        elif Dir == 'DOWN':
-            Dir  = 'DL'
-        Mod  = self.VSA.query(f':CONF:LTE:{Dir}:CC:SUBF0:ALL:MOD?')
-        RBN  = self.VSA.query(f':CONF:LTE:{Dir}:CC:SUBF0:ALL:CLUS1:RBC?')
-        RBO  = self.VSA.query(f':CONF:LTE:{Dir}:CC:SUBF0:ALL:CLUS1:RBOF?')
-        BW   = self.VSA.query(f':CONF:LTE:{Dir}:CC:BW?')
-        self.Wavename = f'LTE_{Dir}_{Dupl}_{BW}_{RBN}RB_{RBO}RBO_{Mod}'
+
+        ldir = self.VSA.query(':CONF:LTE:LDIR?')                        # link direction
+        dupl = self.VSA.query(':CONF:LTE:DUPL?')                        # duplex mode
+        ldir = "UL" if ldir == "UL" else "DL"
+        chbw = self.VSA.query(f':CONF:LTE:{ldir}:CC:BW?')
+        rbn  = self.VSA.query(f':CONF:LTE:{ldir}:CC:SUBF0:ALL:CLUS1:RBC?')
+        rbo  = self.VSA.query(f':CONF:LTE:{ldir}:CC:SUBF0:ALL:CLUS1:rboF?')
+        cmod = self.VSA.query(f':CONF:LTE:{ldir}:CC:SUBF0:ALL:MOD?')
+
+        self.Wavename = f'LTE_{ldir}_{dupl}_{chbw}_{rbn}RB_{rbo}rbo_{cmod}'
         self.VSA.query(f'MMEM:STOR:CC:DEM "C:\\R_S\\instr\\{self.Wavename}.allocation";*OPC?')
         FSW_IP = self.VSA.s.getpeername()[0]            # Instr
         os.system(f'start \\\\{FSW_IP}\\instr')
@@ -73,21 +72,21 @@ class config():
     def VSG_save_state(self):
         """VSG Save State"""
         self.VSG.query(f'*IDN?')
-        Dir  = self.VSG.query(':SOUR1:BB:EUTR:LINK?')
-        Dupl = self.VSG.query(':SOUR1:BB:EUTR:DUPL?')
-        if Dir == 'UP':
-            Dir  = 'UL'
-            Mod  = self.VSG.query(f':SOUR1:BB:EUTR:{Dir}:CELL0:SUBF0:ALL0:PUSC:MOD?')
-            RBN  = self.VSG.query(f':SOUR1:BB:EUTR:{Dir}:CELL0:SUBF0:ALL0:PUSC:SET1:RBC?')
-            RBO  = self.VSG.query(f':SOUR1:BB:EUTR:{Dir}:CELL0:SUBF0:ALL0:PUSC:SET1:VRB?')
-            BW   = self.VSG.query(f':SOUR1:BB:EUTR:{Dir}:BW?')
-        elif Dir == 'DOWN':
-            Dir  = 'DL'
-            Mod  = self.VSG.query(f':SOUR1:BB:EUTR:{Dir}:CELL0:SUBF0:ALL0:PUSC:MOD?')
-            RBN  = self.VSG.query(f':SOUR1:BB:EUTR:{Dir}:CELL0:SUBF0:ALL0:PUSC:SET1:RBC?')
-            RBO  = self.VSG.query(f':SOUR1:BB:EUTR:{Dir}:CELL0:SUBF0:ALL0:PUSC:SET1:VRB?')
-            BW   = self.VSG.query(f':SOUR1:BB:EUTR:{Dir}:BW?')
-        self.Wavename = f'LTE_{Dir}_{Dupl}_{BW}_{RBN}RB_{RBO}RBO_{Mod}'
+        ldir = self.VSG.query(':SOUR1:BB:EUTR:LINK?')
+        dupl = self.VSG.query(':SOUR1:BB:EUTR:DUPL?')
+        if ldir == 'UP':
+            ldir  = 'UL'
+            Mod  = self.VSG.query(f':SOUR1:BB:EUTR:{ldir}:CELL0:SUBF0:ALL0:PUSC:MOD?')
+            rbn  = self.VSG.query(f':SOUR1:BB:EUTR:{ldir}:CELL0:SUBF0:ALL0:PUSC:SET1:RBC?')
+            rbo  = self.VSG.query(f':SOUR1:BB:EUTR:{ldir}:CELL0:SUBF0:ALL0:PUSC:SET1:VRB?')
+            chbw = self.VSG.query(f':SOUR1:BB:EUTR:{ldir}:BW?')
+        elif ldir == 'DOWN':
+            ldir  = 'DL'
+            Mod  = self.VSG.query(f':SOUR1:BB:EUTR:{ldir}:CELL0:SUBF0:ALL0:PUSC:MOD?')
+            rbn  = self.VSG.query(f':SOUR1:BB:EUTR:{ldir}:CELL0:SUBF0:ALL0:PUSC:SET1:RBC?')
+            rbo  = self.VSG.query(f':SOUR1:BB:EUTR:{ldir}:CELL0:SUBF0:ALL0:PUSC:SET1:VRB?')
+            chbw = self.VSG.query(f':SOUR1:BB:EUTR:{ldir}:BW?')
+        self.Wavename = f'LTE_{ldir}_{dupl}_{chbw}_{rbn}RB_{rbo}rbo_{Mod}'
         self.VSG.query(f':SOUR1:BB:EUTR:SETT:STOR "/var/user/{self.Wavename}";*OPC?')
         SMW_IP = self.VSG.s.getpeername()[0]        # Instr
         os.system(f'start \\\\{SMW_IP}\\user')
