@@ -1,4 +1,5 @@
 from bench_config import bench
+from utils import method_timer, std_meas
 
 class option_functions():
     def __init__(self):
@@ -6,17 +7,21 @@ class option_functions():
         self.VSA.s.settimeout(30)           # For AutoEVM
         self.VSG = bench().VSG_start()
 
+    @method_timer
     def get_ACLR(self):
         pass
 
+    @method_timer
     def get_EVM(self):
         try:
+            self.VSA.query('INIT:IMM;*OPC?')                            # Take a sweep
             EVM = self.VSA.queryFloat(':FETC:CC1:SUMM:EVM:ALL:AVER?')   # VSA CW
-        except:
-            self.VSA.query('INIT:IMM;*OPC?')
+        except:                                                         # noqa
+            self.VSA.query('INIT:IMM;*OPC?')                            # Take a sweep
             EVM = self.VSA.queryFloat(':FETC:CC1:SUMM:EVM:ALL:AVER?')   # VSA CW
         return EVM
 
+    @method_timer
     def get_info(self):
         freq = self.VSA.query(':SENS:FREQ:CENT?')                       # Center Frequency
         freq = int(freq) / 1e9
@@ -43,6 +48,7 @@ class option_functions():
         chPw = self.VSA.queryFloat(':FETC:CC1:SUMM:POW:AVER?')          # VSA CW Ch Pwr
         return chPw
 
+    @method_timer
     def set_VSA_init(self):
         self.VSA.write('INIT:CONT OFF')                                 # Single Sweep
         self.VSA.write(':TRIG:SEQ:SOUR EXT')                            # Trigger External
@@ -51,24 +57,26 @@ class option_functions():
         # self.VSA.write(':SENS:SWE:TIME 0.002')                        # Capture Time
         self.VSA.write(':SENS:LTE:FRAM:SSUB ON')                        # Single Subframe Mode
 
-    def set_VSA_level(self, method='LEV'):
-        '''# LEV:autolevel'''
-        self.VSA.tick()
+    @method_timer
+    def set_VSA_level(self, method):
+        '''# LEV:autolevel EVM:autoEVM'''
         if 'LEV' in method:
             self.VSA.query(f':SENS:ADJ:LEV;*OPC?')                      # Autolevel
         else:
             self.VSA.write(f':INP:ATT:AUTO ON')                         # AutoAttenuation
             pwr = self.get_VSA_chPwr()
             self.VSA.write(f':DISP:WIND:TRAC:Y:SCAL:RLEV {pwr - 2}')    # Manually set ref level
-        return self.VSA.tock()
 
+    @method_timer
     def get_VSA_sweep(self):
         self.VSA.write('INIT:CONT OFF')                                 # Cont Sweep off
         self.VSA.query('INIT:IMM;*OPC?')                                # Single Sweep
 
+    @method_timer
     def set_VSG_init(self):
         self.VSG.write(':SOUR1:CORR:OPT:EVM 1')                         # Optimize EVM
         self.VSG.write(':SOUR1:BB:EUTR:TRIG:OUTP1:MODE REST')           # Maker Mode Arb Restart
+        self.VSG.query('*OPC?')
 
     def set_VSG_pwr(self, pwr):
         self.VSG.write(f':SOUR1:POW:POW {pwr}')                         # VSG Power
@@ -80,11 +88,4 @@ class option_functions():
 
 
 if __name__ == '__main__':
-    林 = option_functions()
-    林.get_info()
-    林.set_VSA_init()
-    林.set_VSG_init()
-    EVMM = 林.get_EVM()
-    ACLR = 林.get_ACLR()
-    chPw = 林.get_VSA_chPwr()
-    print(f'EVM:{EVMM:.2f} CH_Pwr:{chPw:.2f} ACLR:{ACLR}')
+    std_meas(option_functions())

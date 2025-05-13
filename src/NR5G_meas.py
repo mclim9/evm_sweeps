@@ -1,4 +1,5 @@
 from bench_config import bench
+from utils import method_timer, std_meas
 
 class option_functions():
     def __init__(self):
@@ -6,14 +7,16 @@ class option_functions():
         self.VSA.s.settimeout(30)           # For AutoEVM
         self.VSG = bench().VSG_start()
 
+    @method_timer
     def get_ACLR(self):
         pass
 
+    @method_timer
     def get_EVM(self):
         try:
             self.VSA.query('INIT:IMM;*OPC?')                            # Take a sweep
             EVM = self.VSA.queryFloat(':FETC:CC1:SUMM:EVM:ALL:AVER?')   # VSA CW
-        except:
+        except:                                                         # noqa
             print('EVM 2nd Try')
             self.VSA.query('INIT:IMM;*OPC?')                            # Take a sweep
             EVM = self.VSA.queryFloat(':FETC:CC1:SUMM:EVM:ALL:AVER?')   # VSA CW
@@ -49,6 +52,7 @@ class option_functions():
         chPw = self.VSA.queryFloat(':FETC:CC1:ISRC:FRAM:SUMM:POW?')     # VSA CW Ch Pwr
         return chPw
 
+    @method_timer
     def set_VSA_init(self):
         self.VSA.write('INIT:CONT OFF')                                 # Single Sweep
         self.VSA.write(':TRIG:SEQ:SOUR EXT')                            # Trigger External
@@ -59,6 +63,7 @@ class option_functions():
         self.VSA.write(':CONF:NR5G:DL:CC1:RFUC:STAT OFF')               # Phase compensation
         # VSA.write(':SENS:NR5G:RSUM:CCR ALL')                          # CA View all CC results
 
+    @method_timer
     def set_VSA_level(self, method='LEV'):
         '''# LEV:autolevel EVM:autoEVM'''
         if 'EVM' in method:
@@ -70,10 +75,12 @@ class option_functions():
             pwr = self.get_VSA_chPwr()
             self.VSA.write(f':DISP:WIND:TRAC:Y:SCAL:RLEV {pwr - 2}')    # Manually set ref level
 
+    @method_timer
     def get_VSA_sweep(self):
         self.VSA.write('INIT:CONT OFF')
         self.VSA.query('INIT:IMM;*OPC?')
 
+    @method_timer
     def set_VSG_init(self):
         self.VSG.write(':SOUR1:CORR:OPT:EVM 1')                         # Optimize EVM
         self.VSG.write(':SOUR1:BB:NR5G:TRIG:OUTP1:MODE REST')           # Maker Mode Arb Restart
@@ -90,11 +97,4 @@ class option_functions():
 
 
 if __name__ == '__main__':
-    林 = option_functions()
-    林.get_info()
-    林.set_VSA_init()
-    林.set_VSG_init()
-    EVMM = 林.get_EVM()
-    ACLR = 林.get_ACLR()
-    chPw = 林.get_VSA_chPwr()
-    print(f'EVM:{EVMM:.2f} CH_Pwr:{chPw:.2f} ACLR:{ACLR}')
+    std_meas(option_functions())

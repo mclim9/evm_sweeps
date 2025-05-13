@@ -1,4 +1,5 @@
 from bench_config import bench
+from utils import method_timer, std_meas
 
 class option_functions():
     def __init__(self):
@@ -6,14 +7,16 @@ class option_functions():
         self.VSA.s.settimeout(30)           # For AutoEVM
         self.VSG = bench().VSG_start()
 
+    @method_timer
     def get_ACLR(self):
         pass
 
+    @method_timer
     def get_EVM(self):
         EVM = self.VSA.query(':FETC:BURS:EVM:DATA:AVER?').split(',')    # EVM
         try:
             EVM = float(EVM[0])
-        except:
+        except:                                                         # noqa
             EVM = 999
         return EVM
 
@@ -38,11 +41,13 @@ class option_functions():
         # chPw = self.VSA.queryFloat(':FETC:CC1:ISRC:FRAM:SUMM:POW?')   # VSA CW Ch Pwr
         return chPw
 
+    @method_timer
     def set_VSA_init(self):
         self.VSA.write('INIT:CONT OFF')                                 # Single Sweep
         self.VSA.write(':TRIG:SEQ:SOUR EXT')                            # Trigger External
         self.VSA.write(':SENS:DEM:TXAR OFF')                            # Power Interval Search
 
+    @method_timer
     def set_VSA_level(self, method):
         '''# LEV:autolevel EVM:autoEVM'''
         if 'LEV' in method:
@@ -54,13 +59,16 @@ class option_functions():
             pwr = self.get_VSA_chPwr()
             self.VSA.write(f':DISP:WIND:TRAC:Y:SCAL:RLEV {pwr - 2}')    # Manually set ref level
 
+    @method_timer
     def get_VSA_sweep(self):
         self.VSA.write('INIT:CONT OFF')                                 # Cont Sweep off
         self.VSA.query('INIT:IMM;*OPC?')                                # Single Sweep
 
+    @method_timer
     def set_VSG_init(self):
         self.VSG.write(':SOUR1:CORR:OPT:EVM 1')                         # Optimize EVM
-        self.VSG.write(':SOUR1:BB:WLNN:TRIG:OUTP1:MODE REST')           # Marker Mode Arb Restart
+        self.VSG.write(':SOUR1:BB:EUTR:TRIG:OUTP1:MODE REST')           # Maker Mode Arb Restart
+        self.VSG.query('*OPC?')
 
     def set_VSG_pwr(self, pwr):
         self.VSG.write(f':SOUR1:POW:POW {pwr}')                         # VSG Power
@@ -72,5 +80,4 @@ class option_functions():
 
 
 if __name__ == '__main__':
-    林 = option_functions()
-    林.get_info()
+    std_meas(option_functions())

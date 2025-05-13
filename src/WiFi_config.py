@@ -1,12 +1,14 @@
 """ Rohde & Schwarz Automation for demonstration use."""
 import os
 from bench_config import bench
+from utils import method_timer, std_config
 
 class config():
     def __init__(self):
         self.VSA = bench().VSA_start()
         self.VSG = bench().VSG_start()
 
+    @method_timer
     def VSA_Config(self):
         '''Read Frame config from VSG'''
         self.VSA.query('*RST;*OPC?')                            # Reset
@@ -25,7 +27,6 @@ class config():
         # self.VSA.write('CONF:WLAN:RUC:SEGM1:CHAN1:RUL1:USER1:MCS 13')
 
         # self.VSA.write(':LAY:REPL:WIND "3",RSDetailed')         # Detailed Result Summary
-        self.VSA.clear_error()
 
     def VSA_Load(self, file):
         self.VSA.write(f':MMEM:LOAD:DEM:C1 "{file}"')
@@ -50,6 +51,7 @@ class config():
         FSW_IP = self.VSA.s.getpeername()[0]                    # Instr
         os.system(f'start \\\\{FSW_IP}')
 
+    @method_timer
     def VSG_Config(self):
         '''Settings'''
         self.VSG.write(f':SOUR1:BB:WLNN:BW BW320')                  # 320MHz BW
@@ -67,7 +69,7 @@ class config():
         self.VSG.write(f':OUTP1:STAT 1')                        # RF On
         self.VSG.query(':SOUR1:CORR:OPT:EVM 1;*OPC?')           # Optimize EVM
         self.VSG.write(':SOUR1:BB:WLNN:TRIG:OUTP1:MODE REST')   # Maker Mode Arb Restart
-        self.VSG.clear_error()
+        self.VSG.query('*OPC?')
 
     def VSG_save_state(self):
         """VSG Save 5G State"""
@@ -83,15 +85,17 @@ class config():
         SMW_IP = self.VSG.s.getpeername()[0]        # Instr
         os.system(f'start \\\\{SMW_IP}\\user')
 
-    def set_freq(self, freq):
+    @method_timer
+    def get_VSA_sweep(self):
+        self.VSA.write('INIT:CONT OFF')                                 # Cont Sweep off
+        self.VSA.query('INIT:IMM;*OPC?')                                # Single Sweep
+
+    def set_VSx_freq(self, freq):
         self.VSA.write(f':SENS:FREQ:CENT {freq}')
         self.VSG.write(f':SOUR1:FREQ:CW {freq}')
 
 
 if __name__ == '__main__':
     林 = config()
-    林.VSG_Config()
-    林.VSA_Config()
-    林.set_freq(7e9)
-    # 林.VSG_save_state()
-    # 林.VSA_save_state()
+    林.freq = 6e9           # Center Frequency, Hz
+    std_config(林)
