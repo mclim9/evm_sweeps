@@ -1,5 +1,5 @@
-from NR5G_meas import option_functions                      # protocol to use
-# from LTE_meas import option_functions                       # protocol to use
+# from NR5G_meas import option_functions                      # protocol to use
+from LTE_meas import std_insr_driver                        # protocol to use
 # from WiFi_meas import option_functions                    # protocol to use
 from bench_config import bench
 import datetime
@@ -38,30 +38,24 @@ class EVM_Sweep():
     def main(self):
         self.file_write(self.VSA.idn)
         self.file_write(self.VSG.idn)
-        self.file_write(meas.get_info())
+        meas.VSA_Config()
+        meas.VSG_Config()
+        self.file_write(meas.VSA_get_info())
         self.file_write('Date,Time,Freq,Power [dBm],RefLvl [dBm],Attn[dB],ChPwr[dBm],EVM[dB],Leveling,AL-Time,Time[Sec]')
-        meas.set_VSA_init()
-        meas.set_VSG_init()
         for lvling in self.lvl_arry:
             for freq in self.freq_arry:
-                meas.set_VSx_freq(freq)
+                meas.VSx_freq(freq)
                 for pwr in self.pwr_arry:
-                    meas.set_VSG_pwr(pwr)                   # Set VSG Power
-                    self.VSA.tick()                         # Start Autolevel Timer
-                    meas.set_VSA_level(lvling)              # VSA level
-                    alT  = self.VSA.tock()                  # Stop Autolevel Timer
-                    self.VSA.tick()                         # Start EVM Timer
-                    meas.get_VSA_sweep()                    # Take sweep
-                    EVM  = meas.get_EVM()                   # Get EVM
-                    evmT = self.VSA.tock()                  # Stop EVM Timer
-                    attn, refl = meas.get_VSA_attn_reflvl() # Get VSA settings
-                    chPw = meas.get_VSA_chPwr()
+                    meas.VSG_pwr(pwr)                       # Set VSG Power
+                    alT = meas.VSA_level(lvling)[1]         # VSA level
+                    EVM, evmT  = meas.VSA_get_EVM()         # Get EVM
+                    attn, refl = meas.VSA_get_attn_reflvl() # Get VSA settings
+                    chPw = meas.VSA_get_chPwr()             # Get Ch Pwr
                     time = datetime.datetime.now().strftime("%Y/%m/%d,%H:%M:%S")
                     data = f'{time},{freq:11},{pwr:3d},{refl:6.2f},{attn:2s},{chPw:6.2f},{EVM:6.2f},{lvling},{alT:6.3f},{evmT:6.3f}'
                     self.file_write(data, endStr='')
                     self.calc_testtime()
 
 if __name__ == '__main__':
-    test_sweep = EVM_Sweep()
-    meas = option_functions()
-    test_sweep.main()
+    meas = std_insr_driver()
+    EVM_Sweep().main()

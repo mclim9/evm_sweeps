@@ -1,22 +1,27 @@
-""" Rohde & Schwarz Automation for demonstration use."""
-import os
+from utils import method_timer, std_meas, std_config
 from bench_config import bench
-from utils import method_timer, std_config
+import os
 
-class config():
+class std_insr_driver():
     def __init__(self):
         self.VSA = bench().VSA_start()
+        self.VSA.s.settimeout(30)           # For AutoEVM
         self.VSG = bench().VSG_start()
+        self.freq = 6e9                 # Center Frequency, Hz
+        self.scs  = 30                  # Sub Carr Spacing: 30; 60;
+        self.rb   = 273                 # number RB
+        self.rbo  = 0                   # RB Offset
+        self.bw   = 100                 # 10; 50; 100
 
     @method_timer
     def VSA_Config(self):
-        '''VSA FR2 Config'''
+        '''VSA FR1 Config'''
         self.VSA.query('*RST;*OPC?')                            # Reset
         self.VSA.query(':SYST:DISP:UPD ON; *OPC?')              # Display on
-        self.VSA.query(':INST:CRE:NEW NR5G, "5G NR"; *OPC?')    # Start 5GNR
+        self.VSA.query(':INST:CRE:NEW NR5G, "5G NR"; *OPC?')    # Start 5GNR6
         self.VSA.write(':CONF:NR5G:LDIR UL')                    # Link Direction
         self.VSA.write(':CONF:NR5G:UL:CC1:TPR OFF')             # TPrecode
-        self.VSA.write(':CONF:NR5G:UL:CC1:DFR HIGH')            # Band
+        self.VSA.write(':CONF:NR5G:UL:CC1:DFR MIDD')            # Band
         self.VSA.write(f':CONF:NR5G:UL:CC1:BW BW{self.bw}')     # BW
         self.VSA.write(f':CONF:NR5G:UL:CC1:FRAM1:BWP0:SSP SS{self.scs}') # SCS
         self.VSA.write(':CONF:NR5G:UL:CC1:FRAM1:BWP0:CSL 1')    # User Config Slot
@@ -36,6 +41,63 @@ class config():
         self.VSA.write(':SENS:SWE:TIME 0.0005')                 # Capture Time
         self.VSA.write(':CONF:NR5G:UL:CC1:RFUC:STAT OFF')       # Phase compensation
 
+    @method_timer
+    def VSA_get_ACLR(self):
+        pass
+
+    def VSA_get_attn_reflvl(self):
+        attn = self.VSA.query('INP:ATT?')                               # Input Attn
+        refl = self.VSA.queryFloat('DISP:TRAC:Y:SCAL:RLEV?')            # Ref Level
+        return attn, refl
+
+    def VSA_get_chPwr(self):
+        chPw = self.VSA.queryFloat(':FETC:CC1:ISRC:FRAM:SUMM:POW?')     # VSA CW Ch Pwr
+        return chPw
+
+    @method_timer
+    def VSA_get_EVM(self):
+        try:
+            self.VSA.query('INIT:IMM;*OPC?')                            # Take a sweep
+            EVM = self.VSA.queryFloat(':FETC:CC1:SUMM:EVM:ALL:AVER?')   # VSA CW
+        except:                                                         # noqa
+            print('EVM 2nd Try')
+            self.VSA.query('INIT:IMM;*OPC?')                            # Take a sweep
+            EVM = self.VSA.queryFloat(':FETC:CC1:SUMM:EVM:ALL:AVER?')   # VSA CW
+        return EVM
+
+    def VSA_get_info(self):
+        freq = self.VSA.query(':SENS:FREQ:CENT?')                       # Center Frequency
+        freq = int(freq) / 1e9
+        ldir = self.VSA.query(':CONF:NR5G:LDIR?')                       # LinkDir
+        frng = self.VSA.query(f':CONF:{ldir}:DFR?')                     # Freq Range
+        chbw = self.VSA.query(f':CONF:NR5G:{ldir}:CC1:BW?')             # Ch Width
+        bscs = self.VSA.query(f':CONF:NR5G:{ldir}:CC1:FRAM1:BWP0:SSP?') # BWP Sub Carr Spacing
+        bwrb = self.VSA.query(f':CONF:NR5G:{ldir}:CC1:FRAM1:BWP0:RBC?') # BWP RB Allocation
+        cmod = self.VSA.query(f':CONF:NR5G:{ldir}:CC1:FRAM1:BWP0:SLOT0:ALL0:MOD?')    # channel Modulation
+        if ldir == 'UL':
+            tpre = self.VSA.query(f':CONF:NR5G:UL:CC1:TPR?')            # Trans Precoding State
+        else:
+            tpre = 'Off'
+        phas = self.VSA.query(f':CONF:NR5G:{ldir}:CC1:RFUC:STAT?')      # Phase comp state
+        time = self.VSA.query(':SENS:SWE:TIME?')                        # measure time
+        nslt = self.VSA.query(':SENS:NR5G:FRAM:SLOT?')                  # number of slots
+
+        outStr = f'{freq}GHz_{frng}_{ldir}_{chbw}_{bscs}_{bwrb}_{cmod}_TP{tpre}_PhaseComp{phas} {time}sec slots:{nslt}'
+        print(outStr)
+        return outStr
+
+    @method_timer
+    def VSA_level(self, method='LEV'):
+        '''# LEV:autolevel EVM:autoEVM'''
+        if 'EVM' in method:
+            self.VSA.query(f':SENS:ADJ:EVM;*OPC?')                      # AutoEVM
+        elif 'LEV' in method:
+            self.VSA.query(f':SENS:ADJ:LEV;*OPC?')                      # Autolevel
+        else:
+            self.VSA.write(f':INP:ATT:AUTO ON')                         # AutoAttenuation
+            pwr = self.get_VSA_chPwr()
+            self.VSA.write(f':DISP:WIND:TRAC:Y:SCAL:RLEV {pwr - 2}')    # Manually set ref level
+
     def VSA_Load(self, file):
         self.VSA.write(f':MMEM:LOAD:DEM:C1 "{file}"')
 
@@ -48,14 +110,19 @@ class config():
         os.system(f'start \\\\{FSW_IP}\\instr')
 
     @method_timer
+    def VSA_sweep(self):
+        self.VSA.write('INIT:CONT OFF')
+        self.VSA.query('INIT:IMM;*OPC?')
+
+    @method_timer
     def VSG_Config(self):
         '''Config w/ SMW 5G Quick Settings'''
         self.VSG.write(f':SOUR1:BB:NR5G:LINK UP')               # Link Direction
         self.VSG.write(f':SOUR1:BB:NR5G:QCKS:GEN:DUPL FDD')     # FDD TDD
-        self.VSG.write(f':SOUR1:BB:NR5G:QCKS:GEN:CARD FR2_1')   # FR2
+        self.VSG.write(f':SOUR1:BB:NR5G:QCKS:GEN:CARD FR1GT3')  # FR1GT3
         self.VSG.write(f':SOUR1:BB:NR5G:QCKS:GEN:CBW BW{self.bw}')      # BW50 BW100
         self.VSG.write(f':SOUR1:BB:NR5G:QCKS:GEN:SCSP SCS{self.scs}')   # Sub Carrier Spacing
-        self.VSG.write(f':SOUR1:BB:NR5G:QCKS:GEN:ES:MOD QAM1024')# Modulation
+        self.VSG.write(f':SOUR1:BB:NR5G:QCKS:GEN:ES:MOD QAM256')# Modulation
         self.VSG.write(f':SOUR1:BB:NR5G:QCKS:GEN:ES:RBN {self.rb}')     # num RB
         self.VSG.write(f':SOUR1:BB:NR5G:QCKS:GEN:ES:RBOF {self.rbo}')   # RB Offset
         self.VSG.write(f':SOUR1:BB:NR5G:QCKS:APPL')             # QS Apply
@@ -66,6 +133,10 @@ class config():
         self.VSG.query(':SOUR1:CORR:OPT:EVM 1;*OPC?')           # Optimize EVM
         self.VSG.write(':SOUR1:BB:NR5G:TRIG:OUTP1:MODE REST')   # Maker Mode Arb Restart
         self.VSG.write(':SOUR1:BB:NR5G:NODE:RFPH:MODE 0')       # Phase Compensation Off
+        self.VSG.query('*OPC?')
+
+    def VSG_pwr(self, pwr):
+        self.VSG.write(f':SOUR1:POW:POW {pwr}')                         # VSG Power
 
     def VSG_save_state(self):
         """VSG Save 5G State"""
@@ -90,21 +161,12 @@ class config():
         SMW_IP = self.VSG.s.getpeername()[0]                            # Instr
         os.system(f'start \\\\{SMW_IP}\\user')
 
-    @method_timer
-    def get_VSA_sweep(self):
-        self.VSA.write('INIT:CONT OFF')                                 # Cont Sweep off
-        self.VSA.query('INIT:IMM;*OPC?')                                # Single Sweep
-
-    def set_VSx_freq(self, freq):
-        self.VSA.write(f':SENS:FREQ:CENT {freq}')
-        self.VSG.write(f':SOUR1:FREQ:CW {freq}')
+    def VSx_freq(self, freq):
+        # self.VSA.write(f':CONF:NR5G:GMCF {freq}')                     # Ana CA Center Freq
+        self.VSA.write(f':SENSE:FREQ:CENT {freq}')                      # Ana CC Center Freq
+        self.VSG.write(f':SOUR1:FREQ:CW {freq}')                        # Generator center freq
 
 
 if __name__ == '__main__':
-    林 = config()
-    林.freq = 18e9          # Center Frequency, Hz: 24e9; 28e9; 39e9; 43e9
-    林.scs  = 120           # Sub Carr Spacing: 60; 120;
-    林.rb   = 66            # number RB
-    林.rbo  = 0             # RB Offset
-    林.bw   = 100           # 50; 100; 200; 400
-    std_config(林)
+    std_config(std_insr_driver())
+    std_meas(std_insr_driver())
