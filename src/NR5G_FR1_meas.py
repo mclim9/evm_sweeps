@@ -57,11 +57,11 @@ class std_insr_driver():
     @method_timer
     def VSA_get_EVM(self):
         try:
-            self.VSA.query('INIT:IMM;*OPC?')                            # Take a sweep
+            self.VSA_sweep()                                            # Take a sweep
             EVM = self.VSA.queryFloat(':FETC:CC1:SUMM:EVM:ALL:AVER?')   # VSA CW
         except:                                                         # noqa
             print('EVM 2nd Try')
-            self.VSA.query('INIT:IMM;*OPC?')                            # Take a sweep
+            self.VSA_sweep()                                            # Take a sweep
             EVM = self.VSA.queryFloat(':FETC:CC1:SUMM:EVM:ALL:AVER?')   # VSA CW
         return EVM
 
@@ -122,7 +122,7 @@ class std_insr_driver():
         self.VSG.write(f':SOUR1:BB:NR5G:QCKS:GEN:CARD FR1GT3')  # FR1GT3
         self.VSG.write(f':SOUR1:BB:NR5G:QCKS:GEN:CBW BW{self.bw}')      # BW50 BW100
         self.VSG.write(f':SOUR1:BB:NR5G:QCKS:GEN:SCSP SCS{self.scs}')   # Sub Carrier Spacing
-        self.VSG.write(f':SOUR1:BB:NR5G:QCKS:GEN:ES:MOD QAM256')# Modulation
+        self.VSG.write(f':SOUR1:BB:NR5G:QCKS:GEN:ES:MOD QAM1024')# Modulation
         self.VSG.write(f':SOUR1:BB:NR5G:QCKS:GEN:ES:RBN {self.rb}')     # num RB
         self.VSG.write(f':SOUR1:BB:NR5G:QCKS:GEN:ES:RBOF {self.rbo}')   # RB Offset
         self.VSG.write(f':SOUR1:BB:NR5G:QCKS:APPL')             # QS Apply

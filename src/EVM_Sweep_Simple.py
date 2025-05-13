@@ -1,6 +1,6 @@
-# from NR5G_meas import option_functions                      # protocol to use
-from LTE_meas import std_insr_driver                        # protocol to use
-# from WiFi_meas import option_functions                    # protocol to use
+from NR5G_FR1_meas import std_insr_driver                   # protocol to use
+# from LTE_meas import std_insr_driver                      # protocol to use
+# from WiFi_meas import std_insr_driver                     # protocol to use
 from bench_config import bench
 import datetime
 import timeit
@@ -41,7 +41,7 @@ class EVM_Sweep():
         meas.VSA_Config()
         meas.VSG_Config()
         self.file_write(meas.VSA_get_info())
-        self.file_write('Date,Time,Freq,Power [dBm],RefLvl [dBm],Attn[dB],ChPwr[dBm],EVM[dB],Leveling,AL-Time,Time[Sec]')
+        self.file_write('Date,Time,Freq,Power [dBm],RefLvl [dBm],Attn[dB],ChPwr[dBm],EVM[dB],Leveling,AL-Time,Time[Sec],TotalTime[Sec]')
         for lvling in self.lvl_arry:
             for freq in self.freq_arry:
                 meas.VSx_freq(freq)
@@ -52,7 +52,8 @@ class EVM_Sweep():
                     attn, refl = meas.VSA_get_attn_reflvl() # Get VSA settings
                     chPw = meas.VSA_get_chPwr()             # Get Ch Pwr
                     time = datetime.datetime.now().strftime("%Y/%m/%d,%H:%M:%S")
-                    data = f'{time},{freq:11},{pwr:3d},{refl:6.2f},{attn:2s},{chPw:6.2f},{EVM:6.2f},{lvling},{alT:6.3f},{evmT:6.3f}'
+                    totalTime = alT + evmT
+                    data = f'{time},{freq:11},{pwr:3d},{refl:6.2f},{attn:2s},{chPw:6.2f},{EVM:6.2f},{lvling},{alT:6.3f},{evmT:6.3f},{totalTime:6.3f}'
                     self.file_write(data, endStr='')
                     self.calc_testtime()
 
