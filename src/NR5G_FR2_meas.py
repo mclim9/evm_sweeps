@@ -3,7 +3,10 @@ from bench_config import bench
 import os
 
 class std_insr_driver():
+    """FSx & SMx 5GNR FR2 driver"""
+
     def __init__(self):
+        """Initialize instrument connections and default parameters."""
         self.VSA = bench().VSA_start()
         self.VSA.s.settimeout(30)   # For AutoEVM
         self.VSG = bench().VSG_start()
@@ -16,7 +19,7 @@ class std_insr_driver():
 
     @method_timer
     def VSA_Config(self):
-        '''VSA FR1 Config'''
+        """VSA Config Before start of test suite"""
         self.VSA.query('*RST;*OPC?')                            # Reset
         self.VSA.query(':SYST:DISP:UPD ON; *OPC?')              # Display on
         self.VSA.query(':INST:CRE:NEW NR5G, "5G NR"; *OPC?')    # Start 5GNR6
@@ -44,29 +47,59 @@ class std_insr_driver():
 
     @method_timer
     def VSA_get_ACLR(self):
-        pass
+        """Get VSA ACLR.
+
+        Returns:
+            tuple: (Channel Power(float), ACLR(float))
+        """
+        self.VSA.write(':CONF:NR5G:MEAS ACLR')
+        self.VSA_sweep()
+        chPwr = self.VSA.query(':CALC:MARK:FUNC:POW:RES? CPOW')         # Channel Power
+        ACLRV = self.VSA.query(':CALC:MARK:FUNC:POW:RES? ACP')          # ACLR Relative
+        print(f'{chPwr} {ACLRV}')
+        return chPwr, ACLRV
 
     def VSA_get_attn_reflvl(self):
+        """Get VSA input atten and ref level.
+
+        Returns:
+            tuple: (attenuation, reference_level)
+        """
         attn = self.VSA.query('INP:ATT?')                               # Input Attn
         refl = self.VSA.queryFloat('DISP:TRAC:Y:SCAL:RLEV?')            # Ref Level
         return attn, refl
 
     def VSA_get_chPwr(self):
+        """Get VSA channel power from result summary
+
+        Returns:
+            chPw(float): channel Power
+        """
         chPw = self.VSA.queryFloat(':FETC:CC1:ISRC:FRAM:SUMM:POW?')     # VSA CW Ch Pwr
         return chPw
 
     @method_timer
     def VSA_get_EVM(self):
+        """Takes a sweep then returns VSA EVM
+
+        Returns:
+            EVM(float) : EVM as defined by standard
+        """
         try:
-            self.VSA.query('INIT:IMM;*OPC?')                            # Take a sweep
+            self.VSA_sweep()                                            # Take a sweep
             EVM = self.VSA.queryFloat(':FETC:CC1:SUMM:EVM:ALL:AVER?')   # VSA CW
         except:                                                         # noqa
             print('EVM 2nd Try')
-            self.VSA.query('INIT:IMM;*OPC?')                            # Take a sweep
+            self.VSA_sweep()                                            # Take a sweep
             EVM = self.VSA.queryFloat(':FETC:CC1:SUMM:EVM:ALL:AVER?')   # VSA CW
         return EVM
 
     def VSA_get_info(self):
+        """VSA standard config detail string
+
+        Returns:
+            outStr(str): Formatted string with configuration details.
+        """
         freq = self.VSA.query(':SENS:FREQ:CENT?')                       # Center Frequency
         freq = int(freq) / 1e9
         ldir = self.VSA.query(':CONF:NR5G:LDIR?')                       # LinkDir
@@ -89,7 +122,13 @@ class std_insr_driver():
 
     @method_timer
     def VSA_level(self, method='LEV'):
-        '''# LEV:autolevel EVM:autoEVM'''
+        """Adjust VSA level settings.
+
+        Args:
+            method (str): 'LEV' for autolevel
+                          'EVM' for autoEVM (if available)
+                          'MAN' for manually set
+        """
         if 'EVM' in method:
             self.VSA.query(f':SENS:ADJ:EVM;*OPC?')                      # AutoEVM
         elif 'LEV' in method:
@@ -100,6 +139,11 @@ class std_insr_driver():
             self.VSA.write(f':DISP:WIND:TRAC:Y:SCAL:RLEV {pwr - 2}')    # Manually set ref level
 
     def VSA_Load(self, file):
+        """Load VSA demodulation state from file.
+
+        Args:
+            file (str): Path to state file.
+        """
         self.VSA.write(f':MMEM:LOAD:DEM:C1 "{file}"')
 
     def VSA_save_state(self):
@@ -112,12 +156,13 @@ class std_insr_driver():
 
     @method_timer
     def VSA_sweep(self):
+        """VSA take a single sweep"""
         self.VSA.write('INIT:CONT OFF')
         self.VSA.query('INIT:IMM;*OPC?')
 
     @method_timer
     def VSG_Config(self):
-        '''Config w/ SMW 5G Quick Settings'''
+        """Config w/ SMW 5G Quick Settings"""
         self.VSG.write(f':SOUR1:BB:NR5G:LINK UP')               # Link Direction
         self.VSG.write(f':SOUR1:BB:NR5G:QCKS:GEN:DUPL FDD')     # FDD TDD
         self.VSG.write(f':SOUR1:BB:NR5G:QCKS:GEN:CARD FR2_1')   # FR2
@@ -164,6 +209,7 @@ class std_insr_driver():
         os.system(f'start \\\\{SMW_IP}\\user')
 
     def VSx_freq(self, freq):
+        """Configures both VSG & VSA to frequency"""
         # self.VSA.write(f':CONF:NR5G:GMCF {freq}')                     # Ana CA Center Freq
         self.VSA.write(f':SENSE:FREQ:CENT {freq}')                      # Ana CC Center Freq
         self.VSG.write(f':SOUR1:FREQ:CW {freq}')                        # Generator center freq
