@@ -12,6 +12,7 @@ class std_insr_driver():
         self.rb   = 273                 # number RB
         self.rbo  = 0                   # RB Offset
         self.bw   = 100                 # 10; 50; 100
+        self.pwr  = -10                 # VSG Initial power
 
     @method_timer
     def VSA_Config(self):
@@ -43,7 +44,11 @@ class std_insr_driver():
 
     @method_timer
     def VSA_get_ACLR(self):
-        pass
+        self.VSA.write(':CONF:NR5G:MEAS ACLR')
+        self.VSA_sweep()
+        chPwr = self.VSA.query(':CALC:MARK:FUNC:POW:RES? CPOW')         # Channel Power
+        ACLRV = self.VSA.query(':CALC:MARK:FUNC:POW:RES? ACP')          # ACLR Relative
+        print(f'{chPwr} {ACLRV}')
 
     def VSA_get_attn_reflvl(self):
         attn = self.VSA.query('INP:ATT?')                               # Input Attn
@@ -133,6 +138,7 @@ class std_insr_driver():
         self.VSG.query(':SOUR1:CORR:OPT:EVM 1;*OPC?')           # Optimize EVM
         self.VSG.write(':SOUR1:BB:NR5G:TRIG:OUTP1:MODE REST')   # Maker Mode Arb Restart
         self.VSG.write(':SOUR1:BB:NR5G:NODE:RFPH:MODE 0')       # Phase Compensation Off
+        self.VSG_pwr(self.pwr)                                  # Initial VSG power
         self.VSG.query('*OPC?')
 
     def VSG_pwr(self, pwr):
@@ -168,5 +174,7 @@ class std_insr_driver():
 
 
 if __name__ == '__main__':
-    std_config(std_insr_driver())
-    std_meas(std_insr_driver())
+    # std_config(std_insr_driver())
+    # std_meas(std_insr_driver())
+    instr = std_insr_driver()
+    instr.VSA_get_ACLR()

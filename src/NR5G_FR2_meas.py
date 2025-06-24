@@ -12,6 +12,7 @@ class std_insr_driver():
         self.rb   = 66              # number RB
         self.rbo  = 0               # RB Offset
         self.bw   = 100             # 50; 100; 200; 400
+        self.pwr  = -10             # VSG Initial power
 
     @method_timer
     def VSA_Config(self):
@@ -133,6 +134,7 @@ class std_insr_driver():
         self.VSG.query(':SOUR1:CORR:OPT:EVM 1;*OPC?')           # Optimize EVM
         self.VSG.write(':SOUR1:BB:NR5G:TRIG:OUTP1:MODE REST')   # Maker Mode Arb Restart
         self.VSG.write(':SOUR1:BB:NR5G:NODE:RFPH:MODE 0')       # Phase Compensation Off
+        self.VSG_pwr(self.pwr)                                  # Initial VSG power
         self.VSG.query('*OPC?')
 
     def VSG_pwr(self, pwr):

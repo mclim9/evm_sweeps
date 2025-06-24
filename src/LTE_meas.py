@@ -11,6 +11,7 @@ class std_insr_driver():
         self.rbo = 0                    # RB Offset
         self.bw  = 5                    # Ch BW, MHz 3; 5; 10; 15; 20
         self.freq = 6e9                 # Center Frequency, Hz
+        self.pwr  = -10                 # VSG Initial power
 
     @method_timer
     def VSA_Config(self):
@@ -40,7 +41,11 @@ class std_insr_driver():
 
     @method_timer
     def VSA_get_ACLR(self):
-        pass
+        self.VSA.write(':CONF:LTE:MEAS ACLR')
+        self.VSA_sweep()
+        chPwr = self.VSA.query(':CALC:MARK:FUNC:POW:RES? CPOW')         # Channel Power
+        ACLRV = self.VSA.query(':CALC:MARK:FUNC:POW:RES? ACP')          # ACLR Relative
+        print(f'{chPwr} {ACLRV}')
 
     def VSA_get_attn_reflvl(self):
         attn = self.VSA.query('INP:ATT?')                               # Input Attn
@@ -133,6 +138,7 @@ class std_insr_driver():
         self.VSG.write(f':OUTP1:STAT 1')                                # RF On
         self.VSG.query(':SOUR1:CORR:OPT:EVM 1;*OPC?')                   # Optimize EVM
         self.VSG.write(':SOUR1:BB:EUTR:TRIG:OUTP1:MODE REST')           # Maker Mode Arb Restart
+        self.VSG_pwr(self.pwr)                                          # Initial VSG power
         self.VSG.query('*OPC?')
 
     def VSG_pwr(self, pwr):
@@ -167,5 +173,10 @@ class std_insr_driver():
 
 
 if __name__ == '__main__':
-    std_config(std_insr_driver())
-    std_meas(std_insr_driver())
+    # std_config(std_insr_driver())
+    # std_meas(std_insr_driver())
+    instr = std_insr_driver()
+    instr.VSA_get_ACLR()
+    # LTE_FDD_5MHz_QPSK_1RB_0StartRB_SCS15kHz
+    # LTE_FDD_5MHz_QPSK_1RB_24StartRB_SCS15kHz
+    # 2.5GHz; QPSK; FDD

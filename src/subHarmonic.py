@@ -1,3 +1,4 @@
+from utils import method_timer
 from bench_config import bench
 import numpy as np
 
@@ -7,6 +8,7 @@ class option_functions():
         self.VSA.s.settimeout(30)                                   # For AutoEVM
         self.VSG = bench().VSG_start()
 
+    @method_timer
     def VSA_Config(self):
         self.VSA.query('*RST;*OPC?')                                # Reset
         self.VSA.tick()
@@ -18,7 +20,7 @@ class option_functions():
         self.VSA.write(f':INP:GAIN:VAL 30')                         # pre-amp gain
         self.VSA.write(f':INP:ATT:AUTO OFF')                        # auto attenuation
         self.VSA.write(f':INP:ATT 0')                               # attenuation value
-        self.VSA.write(f':DISP:WIND:TRAC:Y:SCAL:RLEV -40')       z   # Reference level
+        self.VSA.write(f':DISP:WIND:TRAC:Y:SCAL:RLEV -40')          # Reference level
         self.STN_Noise_Marker()
         self.VSA.clear_error()
 
@@ -30,14 +32,13 @@ class option_functions():
         self.VSA.write(f':CALC1:MARK1:FUNC:NOIS:STAT ON')           # Marker1 Noise Marker
         self.VSA.write(f':CALC1:MARK1:X {frequncy}')                # Marker1 Noise Marker
 
+    @method_timer
     def get_VSA_sweep_noise_mkr(self):
-        self.VSA.tick()
         self.VSA.write('INIT:CONT OFF')                             # Cont Sweep off
         self.VSA.query('INIT:IMM;*OPC?')                            # Single Sweep
         marker1 = self.VSA.queryFloat(':CALC:MARK1:Y?')             # Marker Y value
         marker1 = self.VSA.queryFloat(':CALC:MARK:FUNC:NOIS:RES?')  # Marker Nosie
-        swp_time = self.VSA.tock()
-        return marker1, swp_time
+        return marker1
 
     def get_Array_stats(self, in_arry):
         avg = np.mean(in_arry)        # Calc average
