@@ -1,6 +1,6 @@
 from NR5G_FR1_meas import std_insr_driver                   # protocol to use
-# from LTE_meas import std_insr_driver                      # protocol to use
-# from WiFi_meas import std_insr_driver                     # protocol to use
+# from driver.LTE_meas import std_insr_driver                      # protocol to use
+# from driver.WiFi_meas import std_insr_driver                     # protocol to use
 from bench_config import bench
 import datetime
 import timeit
@@ -11,7 +11,7 @@ class EVM_Sweep():
         # self.freq_arry = range(int(1e9), int(50e9), int(1000e6))
         self.freq_arry = [int(0.850e9)]
         self.pwr_arry = range(-45, 15, 1)
-        self.lvl_arry = ['LEV']                             # LEV:autolevel EVM:autoEVM
+        self.lvl_arry = ['LEV']                                     # LEV:autolevel EVM:autoEVM
 
         self.VSA = bench().VSA_start()
         self.VSG = bench().VSG_start()
@@ -47,10 +47,10 @@ class EVM_Sweep():
                 meas.VSx_freq(freq)
                 for pwr in self.pwr_arry:
                     meas.VSG_pwr(pwr)                       # Set VSG Power
-                    alT = meas.VSA_level(lvling)[1]         # VSA level
-                    EVM, evmT  = meas.VSA_get_EVM()         # Get EVM
-                    attn, refl = meas.VSA_get_attn_reflvl() # Get VSA settings
-                    chPw = meas.VSA_get_chPwr()             # Get Ch Pwr
+                    alT = meas.VSA_level(lvling)[1]         # Get VSA leveling time(-float-)
+                    EVM, evmT  = meas.VSA_get_EVM()         # Get EVM(-float-) & EVM Time(-float-)
+                    attn, refl = meas.VSA_get_attn_reflvl() # Get Attn(-str-) & RefLevel(-float-)
+                    chPw = meas.VSA_get_chPwr()             # Get Ch Pwr(-float-)
                     time = datetime.datetime.now().strftime("%Y/%m/%d,%H:%M:%S")
                     totalTime = alT + evmT
                     data = f'{time},{freq:11},{pwr:3d},{refl:6.2f},{attn:2s},{chPw:6.2f},{EVM:6.2f},{lvling},{alT:6.3f},{evmT:6.3f},{totalTime:6.3f}'
