@@ -3,10 +3,10 @@ import timeit
 import numpy as np
 
 def get_Array_stats(in_arry):
-    avg = np.mean(in_arry)        # Calc average
-    min = np.min(in_arry)         # Calc minimum
-    max = np.max(in_arry)         # Calc maximum
-    std_dev = np.std(in_arry)     # Calc standard deviation
+    avg = np.mean(in_arry)                          # Calc average
+    min = np.min(in_arry)                           # Calc minimum
+    max = np.max(in_arry)                           # Calc maximum
+    std_dev = np.std(in_arry)                       # Calc standard deviation
     out_str = f'Min:{min:.3f} Max:{max:.3f} Avg:{avg:.3f} StdDev:{std_dev:.3f} Delta:{max - min:.3f}'
     print(out_str)
     return out_str

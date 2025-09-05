@@ -1,6 +1,7 @@
-from utils import method_timer, std_meas, std_config
-from bench_config import bench
+# from src.utils import method_timer, std_meas, std_config
+from src.bench_config import bench
 import os
+print("Current Directory:", os.path.abspath('.'))
 
 class std_insr_driver():
     """FSx & SMx LTE driver"""
@@ -8,13 +9,13 @@ class std_insr_driver():
     def __init__(self):
         """Initialize instrument connections and default parameters."""
         self.VSA = bench().VSA_start()
-        self.VSA.s.settimeout(30)       # For AutoEVM
+        self.VSA.s.settimeout(30)                   # For AutoEVM
         self.VSG = bench().VSG_start()
-        self.rbc = 24                   # Num RB
-        self.rbo = 0                    # RB Offset
-        self.bw  = 5                    # Ch BW, MHz 3; 5; 10; 15; 20
-        self.freq = 6e9                 # Center Frequency, Hz
-        self.pwr  = -10                 # VSG Initial power
+        self.rbc = 24                               # Num RB
+        self.rbo = 0                                # RB Offset
+        self.bw  = 5                                # Ch BW, MHz 3; 5; 10; 15; 20
+        self.freq = 6e9                             # Center Frequency, Hz
+        self.pwr  = -10                             # VSG Initial power
 
     @method_timer
     def VSA_Config(self):
@@ -51,8 +52,8 @@ class std_insr_driver():
         """
         self.VSA.write(':CONF:LTE:MEAS ACLR')
         self.VSA_sweep()
-        chPwr = self.VSA.queryFloat(':CALC:MARK:FUNC:POW:RES? CPOW')         # Channel Power
-        ACLRV = self.VSA.queryFloat(':CALC:MARK:FUNC:POW:RES? ACP')          # ACLR Relative
+        chPwr = self.VSA.queryFloat(':CALC:MARK:FUNC:POW:RES? CPOW')    # Channel Power
+        ACLRV = self.VSA.queryFloat(':CALC:MARK:FUNC:POW:RES? ACP')     # ACLR Relative
         print(f'{chPwr} {ACLRV}')
         return chPwr, ACLRV
 
