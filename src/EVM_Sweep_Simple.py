@@ -1,6 +1,6 @@
 # from driver.NR5G_FR1_meas import std_insr_driver                   # standard to use
-from driver.LTE_meas import std_insr_driver                      # standard to use
-# from driver.WiFi_meas import std_insr_driver                     # standard to use
+# from driver.LTE_meas import std_insr_driver                      # standard to use
+from driver.WiFi_meas import std_insr_driver                     # standard to use
 from helper.bench_config import bench
 import datetime
 import timeit
@@ -40,8 +40,9 @@ class EVM_Sweep():
         self.file_write(self.VSG.idn)
         meas.VSA_Config()
         meas.VSG_Config()
-        self.file_write(meas.VSA_get_info())
-        self.file_write('Date,Time,Freq,Power [dBm],RefLvl [dBm],Attn[dB],ChPwr[dBm],EVM[dB],Leveling,AL-Time,Time[Sec],TotalTime[Sec]')
+        self.waveform = meas.VSA_get_info()
+        self.file_write(self.waveform)
+        self.file_write('Date,Time,Freq,Power [dBm],RefLvl [dBm],Attn[dB],ChPwr[dBm],EVM[dB],Leveling,AL-Time,Time[Sec],TotalTime[Sec],Waveform')
         for lvling in self.lvl_arry:
             for freq in self.freq_arry:
                 meas.VSx_freq(freq)
@@ -53,7 +54,7 @@ class EVM_Sweep():
                     chPw = meas.VSA_get_chPwr()             # Get Ch Pwr(-float-)
                     time = datetime.datetime.now().strftime("%Y/%m/%d,%H:%M:%S")
                     totalTime = alT + evmT
-                    data = f'{time},{freq:11},{pwr:3d},{refl:6.2f},{attn:2s},{chPw:6.2f},{EVM:6.2f},{lvling},{alT:6.3f},{evmT:6.3f},{totalTime:6.3f}'
+                    data = f'{time},{freq:11},{pwr:3d},{refl:6.2f},{attn:2s},{chPw:6.2f},{EVM:6.2f},{lvling},{alT:6.3f},{evmT:6.3f},{totalTime:6.3f},{self.waveform}'
                     self.file_write(data, endStr='')
                     self.calc_testtime()
 

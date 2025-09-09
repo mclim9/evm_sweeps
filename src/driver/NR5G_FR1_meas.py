@@ -217,7 +217,7 @@ class std_insr_driver():
 
 
 if __name__ == '__main__':
-    # std_config(std_insr_driver())
-    # std_meas(std_insr_driver())
+    std_config(std_insr_driver())
+    std_meas(std_insr_driver())
     instr = std_insr_driver()
     instr.VSA_get_ACLR()
