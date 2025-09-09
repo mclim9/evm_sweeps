@@ -1,11 +1,12 @@
 """Bench Definition File"""
-from iSocket import iSocket                 # Import socket module
+from . import iSocket                 # Import socket module
 import configparser
 
 class bench():
     def __init__(self):
         config = configparser.ConfigParser()
-        config.read('src\\helper\\bench_config.ini')
+        # config.read('src\\helper\\bench_config.ini')
+        config.read(f'{__file__[:-3]}.ini')
         self.VSA_IP = config['Settings']['VSA_IP']
         self.VSG_IP = config['Settings']['VSG_IP']
 

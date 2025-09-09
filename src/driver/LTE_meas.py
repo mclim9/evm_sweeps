@@ -1,6 +1,7 @@
-# from src.utils import method_timer, std_meas, std_config
-from src.bench_config import bench
+from helper.utils import method_timer, std_meas, std_config
+from helper.bench_config import bench
 import os
+
 print("Current Directory:", os.path.abspath('.'))
 
 class std_insr_driver():

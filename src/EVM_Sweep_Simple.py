@@ -1,6 +1,6 @@
-from driver.NR5G_FR1_meas import std_insr_driver                   # protocol to use
-# from driver.LTE_meas import std_insr_driver                      # protocol to use
-# from driver.WiFi_meas import std_insr_driver                     # protocol to use
+# from driver.NR5G_FR1_meas import std_insr_driver                   # standard to use
+from driver.LTE_meas import std_insr_driver                      # standard to use
+# from driver.WiFi_meas import std_insr_driver                     # standard to use
 from helper.bench_config import bench
 import datetime
 import timeit
