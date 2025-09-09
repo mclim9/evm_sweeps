@@ -1,5 +1,5 @@
-from utils import method_timer, std_meas, std_config
-from bench_config import bench
+from helper.utils import method_timer, std_meas, std_config
+from helper.bench_config import bench
 import os
 
 class std_insr_driver():
@@ -217,7 +217,7 @@ class std_insr_driver():
 
 
 if __name__ == '__main__':
-    # std_config(std_insr_driver())
-    # std_meas(std_insr_driver())
+    std_config(std_insr_driver())
+    std_meas(std_insr_driver())
     instr = std_insr_driver()
     instr.VSA_get_ACLR()

@@ -1,5 +1,5 @@
-from utils import method_timer, std_meas, std_config
-from bench_config import bench
+from helper.utils import method_timer, std_meas, std_config
+from helper.bench_config import bench
 import os
 
 class std_insr_driver():
