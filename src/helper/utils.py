@@ -17,7 +17,7 @@ def method_timer(method):
         result = method(*args, **kwargs)            # Call the actual method
         stop_time = timeit.default_timer()          # Stop the timer
         delta_time = stop_time - start_time         # Calculate the elapsed time
-        print(f"{method.__name__:15s}: {delta_time:.3f} secs")
+        # print(f"    {method.__name__:15s}: {delta_time:.3f} secs")
         return result, delta_time
     return wrapper
 
