@@ -1,6 +1,6 @@
-# from driver.NR5G_FR1_meas import std_insr_driver                   # standard to use
-# from driver.LTE_meas import std_insr_driver                      # standard to use
-from driver.WiFi_meas import std_insr_driver                     # standard to use
+# from driver.NR5G_FR1_meas import std_insr_driver                  # standard to use
+# from driver.LTE_meas import std_insr_driver                       # standard to use
+from driver.WiFi_meas import std_insr_driver                        # standard to use
 from helper.bench_config import bench
 import datetime
 import timeit
@@ -15,6 +15,8 @@ class EVM_Sweep():
 
         self.VSA = bench().VSA_start()
         self.VSG = bench().VSG_start()
+
+    def init_testSuite(self):
         self.startTime = datetime.datetime.now().strftime("%Y.%m.%d-%H%M%S")
         self.numb_iter = len(self.freq_arry) * len(self.pwr_arry) * len(self.lvl_arry)
         self.curr_iter = 0
@@ -36,22 +38,23 @@ class EVM_Sweep():
         fily.close()
 
     def main(self):
+        self.init_testSuite()
         self.file_write(self.VSA.idn)
         self.file_write(self.VSG.idn)
-        meas.VSA_Config()
-        meas.VSG_Config()
-        self.waveform = meas.VSA_get_info()
+        self.meas.VSA_Config()
+        self.meas.VSG_Config()
+        self.waveform = self.meas.VSA_get_info()
         self.file_write(self.waveform)
         self.file_write('Date,Time,Freq,Power [dBm],RefLvl [dBm],Attn[dB],ChPwr[dBm],EVM[dB],Leveling,AL-Time,Time[Sec],TotalTime[Sec],Waveform')
         for lvling in self.lvl_arry:
             for freq in self.freq_arry:
-                meas.VSx_freq(freq)
+                self.meas.VSx_freq(freq)
                 for pwr in self.pwr_arry:
-                    meas.VSG_pwr(pwr)                       # Set VSG Power
-                    alT = meas.VSA_level(lvling)[1]         # Get VSA leveling time(-float-)
-                    EVM, evmT  = meas.VSA_get_EVM()         # Get EVM(-float-) & EVM Time(-float-)
-                    attn, refl = meas.VSA_get_attn_reflvl() # Get Attn(-str-) & RefLevel(-float-)
-                    chPw = meas.VSA_get_chPwr()             # Get Ch Pwr(-float-)
+                    self.meas.VSG_pwr(pwr)                           # Set VSG Power
+                    alT = self.meas.VSA_level(lvling)[1]             # Get VSA leveling time(-float-)
+                    EVM, evmT  = self.meas.VSA_get_EVM()             # Get EVM(-float-) & EVM Time(-float-)
+                    attn, refl = self.meas.VSA_get_attn_reflvl()     # Get Attn(-str-) & RefLevel(-float-)
+                    chPw = self.meas.VSA_get_chPwr()                 # Get Ch Pwr(-float-)
                     time = datetime.datetime.now().strftime("%Y/%m/%d,%H:%M:%S")
                     totalTime = alT + evmT
                     data = f'{time},{freq:11},{pwr:3d},{refl:6.2f},{attn:2s},{chPw:6.2f},{EVM:6.2f},{lvling},{alT:6.3f},{evmT:6.3f},{totalTime:6.3f},{self.waveform}'
@@ -59,5 +62,9 @@ class EVM_Sweep():
                     self.calc_testtime()
 
 if __name__ == '__main__':
-    meas = std_insr_driver()
-    EVM_Sweep().main()
+    sweep = EVM_Sweep()
+    sweep.meas = std_insr_driver()
+    sweep.freq_arry = [int(2.4e9), int(5.000e9), int(6.00e9)]    # 802.11 Freqs
+    sweep.pwr_arry = range(-45, 15, 1)
+    sweep.lvl_arry = ['LEV']                                     # LEV:autolevel EVM:autoEVM
+    sweep.main()
