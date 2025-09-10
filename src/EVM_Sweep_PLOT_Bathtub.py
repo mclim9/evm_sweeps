@@ -36,7 +36,7 @@ class plotter():
         print(f'Cols: {list(self.df.columns)}')                                 # Col names
         # self.df.iloc[2, self.df.columns.get_loc['VSG']]                       # Get VSG in row 2
 
-    def filter_data_bathtub(self):
+    def filter_data_bathtub_per_freq(self):
         freq_array = self.df._series['Freq'].unique()
         for freq in freq_array:
             bathTub = self.df[self.df['Freq'].isin([freq])]                     # filter data   | Up Lt
@@ -49,6 +49,18 @@ class plotter():
             # print(f'Traces:{self.table.shape[1]} DataPts:{self.table.shape[0]}')
             self.file_append = f'bathtub_{freq / 1e9:.3f}GHz'
             self.plot_data()
+
+    def filter_data_bathtub(self):
+        bathTub = self.df
+        # df = df[df['lvling'].str.contains('EVM')]                               # filter data   | Up Lt
+        self.Cols = ['Freq', 'Leveling', 'VSG', 'VSA']                          # Split Traces  | Up Rt
+        self.Xval = ['Power [dBm]']                                             # X Values      | Dn Lt
+        self.Yval = ['EVM[dB]']                                                 # Y Values      | Dn Rt
+        self.aggg = 'mean'                                                      # mean | sum
+        self.table = pd.pivot_table(bathTub, values=self.Yval, index=self.Xval, columns=self.Cols, aggfunc=self.aggg)
+        # print(f'Traces:{self.table.shape[1]} DataPts:{self.table.shape[0]}')
+        self.file_append = f'bathtub'
+        self.plot_data()
 
     def filter_data_freqResp(self):
         pwr_arry = [-10, 5, 10, 12]
@@ -63,16 +75,22 @@ class plotter():
             self.plot_data()
 
     def plot_data(self):
+        markers = ['o', 's', '^', 'v', 'D', 'p', '*', '+', 'x', '.']
         print(f'Traces:{self.table.shape[1]:2d} DataPts:{self.table.shape[0]:3d} {self.file_append}')
-        self.table.plot(legend=True)
-        plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=2)
+
+        fig, ax = plt.subplots(figsize=(10, 8))  # Create figure and axes
+
+        for i in range(self.table.shape[1]):
+            self.table.iloc[:, i].plot(ax=ax, legend=True, marker=markers[i % len(markers)], linewidth=2.0) #Use iloc for column selection
+
+        ax.grid(True)
+        ax.set_title(f'{self.Yval} {self.file_append}')
+        ax.set_ylim([-55, -30])
+        ax.set_xlabel(self.Xval)
+        ax.set_ylabel(self.Yval)
+
+        plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=2) #Move legend after plotting all traces
         plt.tight_layout(pad=2)
-        plt.grid()
-        plt.title(f'{self.Yval} {self.file_append}')
-        # plt.axis([-50, 10, -40, -20])                                         # X, Y
-        plt.ylim([-60, -30])
-        plt.xlabel(self.Xval)
-        plt.ylabel(self.Yval)
 
         plt.savefig(f'{self.file_out}_{self.file_append}.png')
         # plt.show()
@@ -83,7 +101,8 @@ class plotter():
         # self.read_data()
         # self.filter_data_freqResp()
         self.filter_data_bathtub()
+        # self.filter_data_bathtub_per_freq()
 
 if __name__ == '__main__':
-    # plotter('EVM_Sweep_Simple_2025.05.09-214057.txt').main()                  # Explicitly name file
+    # plotter('EVM_Sweep_Simple_2025.09.09-163900-WLAN.txt').main()               # Explicitly name file
     plotter().main()                                                            # GUI will prompt for file
