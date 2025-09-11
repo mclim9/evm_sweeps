@@ -14,6 +14,18 @@ class plotter():
         self.file_out = f'{self.file_in.split(".txt")[0]}'
         self.file_append = ''
 
+    def convert_column_to_float(self, df, column_name):
+        if column_name not in df.columns:
+            print(f"Column '{column_name}' not found")
+            return df
+        try:
+            df[column_name] = df[column_name].astype(float)
+            return df
+        except ValueError as e:
+            print(f"Error converting column '{column_name}' to float: {e}")
+            print("Possible issues: Invalid characters, missing values, or values that are not numeric.")
+        return df
+
     def select_file(self):
         root = tk.Tk()
         root.withdraw()  # Hides Tkinter window
@@ -32,6 +44,9 @@ class plotter():
         df_now = df_now.assign(VSA=f'{self.hdr[1][0]}')                         # VSA Model only
         df_now = df_now.assign(VSG=f'{self.hdr[1][1]}')                         # VSG Model only
         df_now = df_now.assign(wave=f'{self.hdr[0][2]}')                        # Waveform
+        df_now = df_now.replace(r'^\s*nan', -9999.99, regex=True)               # Replace NaN with -9999
+        df_now = self.convert_column_to_float(df_now, 'EVM[dB]')                # EVM[dB] to float
+        df_now = self.convert_column_to_float(df_now, 'ChPwr[dBm]')             # ChPwr[dBm] to float
         self.df = pd.concat([self.df, df_now], ignore_index=True)
         print(f'Cols: {list(self.df.columns)}')                                 # Col names
         # self.df.iloc[2, self.df.columns.get_loc['VSG']]                       # Get VSG in row 2
@@ -75,13 +90,13 @@ class plotter():
             self.plot_data()
 
     def plot_data(self):
-        markers = ['o', 's', '^', 'v', 'D', 'p', '*', '+', 'x', '.']
+        markers = ['o', 's', '^', 'v', 'D', '|', 'X', 'p', '4', '*', '+', 'x', '.', '>']
         print(f'Traces:{self.table.shape[1]:2d} DataPts:{self.table.shape[0]:3d} {self.file_append}')
 
         fig, ax = plt.subplots(figsize=(10, 8))  # Create figure and axes
 
         for i in range(self.table.shape[1]):
-            self.table.iloc[:, i].plot(ax=ax, legend=True, marker=markers[i % len(markers)], linewidth=2.0) #Use iloc for column selection
+            self.table.iloc[:, i].plot(ax=ax, legend=True, marker=markers[i % len(markers)], linewidth=2.0) # Use iloc for column selection
 
         ax.grid(True)
         ax.set_title(f'{self.Yval} {self.file_append}')
@@ -89,7 +104,7 @@ class plotter():
         ax.set_xlabel(self.Xval)
         ax.set_ylabel(self.Yval)
 
-        plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=2) #Move legend after plotting all traces
+        plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=2) # Move legend after plotting all traces
         plt.tight_layout(pad=2)
 
         plt.savefig(f'{self.file_out}_{self.file_append}.png')
