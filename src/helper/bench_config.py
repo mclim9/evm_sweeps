@@ -17,15 +17,21 @@ class bench():
         print(self.VSA.idn)
         print(self.VSG.idn)
 
-    def VSA_start(self):
-        self.VSA = iSocket().open(self.VSA_IP, 5025)
+    def VSA_start(self, ip=''):
+        """Start VSA with given IP or default from config."""
+        if not ip:
+            ip = self.VSA_IP
+        self.VSA = iSocket().open(ip, 5025)
         return self.VSA
 
     def VSG_network_reset(self):
         self.VSG_start()
         self.VSG.query(f'SYST:COMM:NETW:REST;*OPC?')
 
-    def VSG_start(self):
+    def VSG_start(self, ip=''):
+        """Start VSA with given IP or default from config."""
+        if not ip:
+            ip = self.VSG_IP
         self.VSG = iSocket().open(self.VSG_IP, 5025)
         return self.VSG
 

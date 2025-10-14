@@ -19,7 +19,7 @@ class std_insr_driver():
         self.pwr  = -10                             # VSG Initial power
 
     @method_timer
-    def VSA_Config(self):
+    def VSA_config(self):
         """VSA Config Before start of test suite"""
         self.VSA.query('*RST;*OPC?')                                    # Reset
         self.VSA.query(f':INST:CRE:NEW LTE, "LTE";*OPC?')               # Opens LTE Mode
@@ -43,6 +43,9 @@ class std_insr_driver():
         self.VSA.write('INIT:CONT OFF')                                 # Single Sweep
         self.VSA.query(f':INIT:IMM;*OPC?')                              # Run Single
         self.VSA.write(':TRIG:SEQ:SOUR EXT')                            # Trigger External
+
+    def VSA_extra(self):
+        return 'none'
 
     @method_timer
     def VSA_get_ACLR(self):
@@ -163,7 +166,7 @@ class std_insr_driver():
         self.VSA.query('INIT:IMM;*OPC?')                                # Single Sweep
 
     @method_timer
-    def VSG_Config(self):
+    def VSG_config(self):
         """VSG Config Before start of test suite"""
         self.VSG.write(f':SOUR1:BB:EUTR:STDM LTE')                      # 4G Std: LTE|EUTRA|IOT
         self.VSG.write(f':SOUR1:BB:EUTR:DUPL FDD')                      # Duplexing: FDD|TDD
@@ -181,6 +184,9 @@ class std_insr_driver():
         self.VSG.write(':SOUR1:BB:EUTR:TRIG:OUTP1:MODE REST')           # Maker Mode Arb Restart
         self.VSG_pwr(self.pwr)                                          # Initial VSG power
         self.VSG.query('*OPC?')
+
+    def VSG_extra(self):
+        return 'none'
 
     def VSG_pwr(self, pwr):
         self.VSG.write(f':SOUR1:POW:POW {pwr}')                         # VSG Power

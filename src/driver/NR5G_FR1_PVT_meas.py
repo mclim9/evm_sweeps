@@ -18,7 +18,7 @@ class std_insr_driver():
         self.pwr  = -10                 # VSG Initial power
 
     @method_timer
-    def VSA_Config(self):
+    def VSA_config(self):
         """VSA Config Before start of test suite"""
         self.VSA.query('*RST;*OPC?')                            # Reset
         self.VSA.query(':SYST:DISP:UPD ON; *OPC?')              # Display on
@@ -44,6 +44,9 @@ class std_insr_driver():
         self.VSA.write(':UNIT:EVM DB')                          # EVM Units: DB PCT
         self.VSA.write(':SENS:SWE:TIME 0.0005')                 # Capture Time
         self.VSA.write(':CONF:NR5G:UL:CC1:RFUC:STAT OFF')       # Phase compensation
+
+    def VSA_extra(self):
+        return 'none'
 
     @method_timer
     def VSA_get_ACLR(self):
@@ -138,7 +141,7 @@ class std_insr_driver():
             pwr = self.get_VSA_chPwr()
             self.VSA.write(f':DISP:WIND:TRAC:Y:SCAL:RLEV {pwr - 2}')    # Manually set ref level
 
-    def VSA_Load(self, file):
+    def VSA_load(self, file):
         """Load VSA demodulation state from file.
 
         Args:
@@ -161,7 +164,7 @@ class std_insr_driver():
         self.VSA.query('INIT:IMM;*OPC?')
 
     @method_timer
-    def VSG_Config(self):
+    def VSG_config(self):
         """Config w/ VSG 5G Quick Settings"""
         self.VSG.write(f':SOUR1:BB:NR5G:LINK UP')               # Link Direction
         self.VSG.write(f':SOUR1:BB:NR5G:QCKS:GEN:DUPL FDD')     # FDD TDD
@@ -181,6 +184,9 @@ class std_insr_driver():
         self.VSG.write(':SOUR1:BB:NR5G:NODE:RFPH:MODE 0')       # Phase Compensation Off
         self.VSG_pwr(self.pwr)                                  # Initial VSG power
         self.VSG.query('*OPC?')
+
+    def VSG_extra(self):
+        return 'none'
 
     def VSG_pwr(self, pwr):
         """Set VSG power (dBm)"""

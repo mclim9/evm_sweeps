@@ -1,5 +1,9 @@
-from helper.utils import method_timer, std_meas, std_config
-from helper.bench_config import bench
+try:
+    from helper.utils import method_timer, std_meas, std_config
+    from helper.bench_config import bench
+except ImportError:
+    from ..helper.utils import method_timer, std_meas, std_config
+    from ..helper.bench_config import bench
 import os
 
 
@@ -14,7 +18,7 @@ class std_insr_driver():
         self.pwr  = -10                                         # VSG Initial power
 
     @method_timer
-    def VSA_Config(self):
+    def VSA_config(self):
         """VSA Config Before start of test suite"""
         self.VSA.query('*RST;*OPC?')                            # Reset
         self.VSA.query(':SYST:DISP:UPD ON; *OPC?')              # Display on
@@ -32,6 +36,13 @@ class std_insr_driver():
         # self.VSA.write('CONF:WLAN:RUC:SEGM1:CHAN1:RUL1:USER1:MCS 13')
 
         # self.VSA.write(':LAY:REPL:WIND "3",RSDetailed')         # Detailed Result Summary
+
+    def VSA_extra(self):
+        extra = ''
+        if extra == 'IQNC':
+            self.VSA.query(':SENS:ADJ:NCAN:AVER:STAT ON; *OPC?')            # IQNC On
+            self.VSA.write(':SENS:ADJ:NCAN:AVER:COUN 10')                   # IQNC Averaging
+        return extra
 
     @method_timer
     def VSA_get_ACLR(self):
@@ -111,7 +122,7 @@ class std_insr_driver():
             pwr = self.get_VSA_chPwr()
             self.VSA.write(f':DISP:WIND:TRAC:Y:SCAL:RLEV {pwr - 2}')    # Manually set ref level
 
-    def VSA_Load(self, file):
+    def VSA_load(self, file):
         """Load VSA demodulation state from file.
 
         Args:
@@ -146,7 +157,7 @@ class std_insr_driver():
         self.VSA.query('INIT:IMM;*OPC?')                                # Single Sweep
 
     @method_timer
-    def VSG_Config(self):
+    def VSG_config(self):
         """Config w/ SMx before test suite"""
         self.VSG.write(f':SOUR1:BB:WLNN:BW BW320')                      # 320MHz BW
         self.VSG.write(f':SOUR1:BB:WLNN:FBL1:TMOD EHT320')              # Tx Mode
@@ -165,6 +176,9 @@ class std_insr_driver():
         self.VSG.write(':SOUR1:BB:WLNN:TRIG:OUTP1:MODE REST')           # Maker Mode Arb Restart
         self.VSG_pwr(self.pwr)                                          # Initial VSG power
         self.VSG.query('*OPC?')
+
+    def VSG_extra(self):
+        return 'none'
 
     def VSG_pwr(self, pwr):
         """Set VSG power (dBm)"""

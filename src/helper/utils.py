@@ -45,4 +45,7 @@ def test(inString):
 
 
 if __name__ == '__main__':
-    test("mud")
+    from driver.WiFi_meas import std_insr_driver                    # standard to use
+
+    meas = std_insr_driver()
+    std_config(meas)
