@@ -1,12 +1,11 @@
 import unittest
-from WiFi_meas import option_functions
-# from bench_config import bench
+from ..src.driver.WiFi_meas import std_insr_driver
 
 
 class TestGeneral(unittest.TestCase):
     def setUp(self):
         '''Run before every test'''
-        self.meas = option_functions()
+        self.meas = std_insr_driver()
 
     def tearDown(self):
         '''Run after every test'''

@@ -19,11 +19,11 @@
 ## Suggested Debug steps
 1. Verify bench
    1. Edit IP address in bench.ini
-   2. Run bench_config.py to connect
+   2. Run bench_Config.py to connect
 2. Config instruments
    1. Preset instruments
    2. Run VSA_Config() & VSG_Config()
-   3. Verify instruments are configured for test
+   3. Verify instruments are Configured for test
    4. Run & verify
       1. VSx_freq(self, freq)
       2. VSA_level(self)
@@ -62,29 +62,29 @@ graph TD
   - VSx_freq(self, freq)
 
 ## Typical tests
-### 5G FR1 Benchmark COnfig
-- Freq: 2; 4; 5; 7GHz
+### 5G FR1 Benchmark Config
+- Freq: 0.7; 1.9; 3.5; 5; 7GHz
 - Pwr : -45 to +5 in 1dB steps
 - Wave: 
   - 5G_FR1_UL_30KHz_SCS_100MHz_RFBW_1024QAM
   - 5G_FR1_DL_30KHz_SCS_100MHz_RFBW_1024QAM
 
-### 5G FR2 Benchmark COnfig
+### 5G FR2 Benchmark Config
 - Freq: 24; 28; 39; 43GHz
 - Pwr : -45 to +5 in 1dB steps
 - Wave: 
   - 5G_FR2_UL_120KHz_SCS_100MHz_RFBW_1024QAM
   - 5G_FR2_DL_120KHz_SCS_100MHz_RFBW_1024QAM
 
-### 5G FR3 Benchmark COnfig
+### 5G FR3 Benchmark Config
 - Freq: 8; 13; 15GHz
 - Pwr : -45 to +5 in 1dB steps
 - Wave: 
   - 5G_FR3_UL_60KHz_SCS_100MHz_RFBW_1024QAM
   - 5G_FR3_DL_60KHz_SCS_100MHz_RFBW_1024QAM
 
-### 802.11 Benchmark COnfig
-- Freq: 2.4; 5.0; 5.8; 7.0GHz
+### 802.11 Benchmark Config
+- Freq: 2.4; 5.3; 5.9; 7.0GHz
 - Pwr : -45 to +5 in 1dB steps
 - Wave: 
   - 802.11be_160MHz_RFBW_4096_Preamble only
