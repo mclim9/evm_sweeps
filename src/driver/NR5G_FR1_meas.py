@@ -35,21 +35,42 @@ class std_insr_driver():
         self.VSA.write(f':CONF:NR5G:UL:CC1:FRAM1:BWP0:SLOT0:ALL0:RBOF {self.rbo}')
         self.VSA.write(':CONF:NR5G:UL:CC1:FRAM1:BWP0:SLOT0:ALL0:MOD Q1K')
 
+        # Results Table Data Removal
+        self.VSA.write(':INIT:CONT OFF')                        #
+        self.VSA.write(':DISP:WIND2:TABL:ITEM USTS,OFF')        #
+        self.VSA.write(':DISP:WIND2:TABL:ITEM SDQP,OFF')        #
+        self.VSA.write(':DISP:WIND2:TABL:ITEM SD1K,OFF')        #
+        self.VSA.write(':DISP:WIND2:TABL:ITEM SD4K,OFF')        #
+        self.VSA.write(':DISP:WIND2:TABL:ITEM SDST,OFF')        #
+        self.VSA.write(':DISP:WIND2:TABL:ITEM US1K,OFF')        #
+        self.VSA.write(':DISP:WIND2:TABL:ITEM USQP,OFF')        #
+        self.VSA.write(':DISP:WIND2:TABL:ITEM USST,OFF')        #
+        self.VSA.write(':DISP:WIND2:TABL:ITEM US4K,OFF')        #
+        self.VSA.write(':DISP:WIND2:TABL:ITEM SDSF,OFF')        #
+        self.VSA.write(':DISP:WIND2:TABL:ITEM UCCH,OFF')        #
+        self.VSA.write(':DISP:WIND2:TABL:ITEM UCCH,ON')         #
+        self.VSA.write(':DISP:WIND2:TABL:ITEM SDTS,OFF')        #
+        self.VSA.write(':DISP:WIND2:TABL:ITEM USSF,OFF')        #
+
         # Additional Settings
         self.VSA.query(':LAY:ADD:WIND? "2",ABOV,EVSC')          # EVM vs Sym vs Carr
-        self.VSA.write(':TRIG:SEQ:SOUR EXT')                    # Trigger External
+        # self.VSA.write(':TRIG:SEQ:SOUR EXT')                    # Trigger External
+        self.VSA.write(':TRIG:SEQ:SOUR IMM')                    # Trigger External
         self.VSA.write(':SENS:NR5G:FRAM:COUN:AUTO OFF')         # Frame count off
         self.VSA.write(':SENS:NR5G:FRAM:COUN 1')                # Single frame
         self.VSA.write(':SENS:NR5G:FRAM:SLOT 1')                # Single Slot
         self.VSA.write(':UNIT:EVM DB')                          # EVM Units: DB PCT
-        self.VSA.write(':SENS:SWE:TIME 0.0005')                 # Capture Time
+        # self.VSA.write(':SENS:SWE:TIME 0.0005')                 # Capture Time
+        self.VSA.write(':SENS:SWE:TIME 0.015')                 # Capture Time
         self.VSA.write(':CONF:NR5G:UL:CC1:RFUC:STAT OFF')       # Phase compensation
 
     def VSA_extra(self):
-        extra = 'IQNC'
+        extra = 'none'  # 'XCORR' or 'IQNC'
         if extra == 'IQNC':
             self.VSA.query(':SENS:ADJ:NCAN:AVER:STAT ON; *OPC?')            # IQNC On
             self.VSA.write(':SENS:ADJ:NCAN:AVER:COUN 10')                   # IQNC Averaging
+        elif extra == 'XCORR':
+            self.VSA.query(':SENS:IQ:XCOR:STAT ON; *OPC?')                  # XCorr On
         return extra
 
     @method_timer

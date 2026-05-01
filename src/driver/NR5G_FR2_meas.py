@@ -12,28 +12,38 @@ class std_insr_driver():
         self.VSG = bench().VSG_start()
         self.freq = 18e9            # Center Frequency, Hz: 24e9; 28e9; 39e9; 43e9
         self.scs  = 120             # Sub Carr Spacing: 60; 120;
-        self.rb   = 66              # number RB
+        self.rb   = 264             # number RB
         self.rbo  = 0               # RB Offset
-        self.bw   = 100             # 50; 100; 200; 400
+        self.bw   = 400             # 50; 100(66); 200(132); 400(264)
         self.pwr  = -10             # VSG Initial power
+        self.ldir = 'DL'            # Link Direction: 'UL' or 'DL'
 
     @method_timer
     def VSA_config(self):
         """VSA Config Before start of test suite"""
-        self.VSA.query('*RST;*OPC?')                            # Reset
-        self.VSA.query(':SYST:DISP:UPD ON; *OPC?')              # Display on
-        self.VSA.query(':INST:CRE:NEW NR5G, "5G NR"; *OPC?')    # Start 5GNR6
-        self.VSA.write(':CONF:NR5G:LDIR UL')                    # Link Direction
-        self.VSA.write(':CONF:NR5G:UL:CC1:TPR OFF')             # TPrecode
-        self.VSA.write(':CONF:NR5G:UL:CC1:DFR HIGH')            # Band
-        self.VSA.write(f':CONF:NR5G:UL:CC1:BW BW{self.bw}')     # BW
-        self.VSA.write(f':CONF:NR5G:UL:CC1:FRAM1:BWP0:SSP SS{self.scs}') # SCS
-        self.VSA.write(':CONF:NR5G:UL:CC1:FRAM1:BWP0:CSL 1')    # User Config Slot
-        self.VSA.write(f':CONF:NR5G:UL:CC1:FRAM1:BWP0:RBC {self.rb}')   # BWP RB
-        self.VSA.write(f':CONF:NR5G:UL:CC1:FRAM1:BWP0:RBOF {self.rbo}') # BWP RB Offset
-        self.VSA.write(f':CONF:NR5G:UL:CC1:FRAM1:BWP0:SLOT0:ALL0:RBC {self.rb}')
-        self.VSA.write(f':CONF:NR5G:UL:CC1:FRAM1:BWP0:SLOT0:ALL0:RBOF {self.rbo}')
-        self.VSA.write(':CONF:NR5G:UL:CC1:FRAM1:BWP0:SLOT0:ALL0:MOD Q1K')
+        self.VSA.query('*RST;*OPC?')                                # Reset
+        self.VSA.query(':SYST:DISP:UPD ON; *OPC?')                  # Display on
+        self.VSA.query(':INST:CRE:NEW NR5G, "5G NR"; *OPC?')        # Start 5GNR6
+        self.VSA.write(f':CONF:NR5G:LDIR {self.ldir}')              # Link Direction
+        self.VSA.write(f':CONF:NR5G:{self.ldir}:CC1:DFR HIGH')      # Band
+        self.VSA.write(f':CONF:NR5G:{self.ldir}:CC1:BW BW{self.bw}') # BW
+
+        if self.ldir == 'DL':
+            chan = 1
+            self.VSA.write(f':CONF:NR5G:{self.ldir}:CC1:FRAM1:BWP:ADD')   # add BWP
+            self.VSA.write(f':CONF:NR5G:DL:CC1:FRAM1:BWP0:SLOT0:CRSC 0')  # Corset off
+
+        elif self.ldir == 'UL':
+            chan = 2
+            self.VSA.write(f':CONF:NR5G:{self.ldir}:CC1:TPR OFF')   # TPrecode
+
+        self.VSA.write(f':CONF:NR5G:{self.ldir}:CC1:FRAM1:BWP0:SSP SS{self.scs}') # SCS
+        self.VSA.write(f':CONF:NR5G:{self.ldir}:CC1:FRAM1:BWP0:CSL 1')    # User Config Slot
+        self.VSA.write(f':CONF:NR5G:{self.ldir}:CC1:FRAM1:BWP0:RBC {self.rb}')   # BWP RB
+        self.VSA.write(f':CONF:NR5G:{self.ldir}:CC1:FRAM1:BWP0:RBOF {self.rbo}') # BWP RB Offset
+        self.VSA.write(f':CONF:NR5G:{self.ldir}:CC1:FRAM1:BWP0:SLOT0:ALL0:RBC {self.rb}')
+        self.VSA.write(f':CONF:NR5G:{self.ldir}:CC1:FRAM1:BWP0:SLOT0:ALL0:RBOF {self.rbo}')
+        self.VSA.write(f':CONF:NR5G:{self.ldir}:CC1:FRAM1:BWP0:SLOT0:ALL0:MOD Q1K')
 
         # Additional Settings
         self.VSA.query(':LAY:ADD:WIND? "2",ABOV,EVSC')          # EVM vs Sym vs Carr
@@ -42,11 +52,11 @@ class std_insr_driver():
         self.VSA.write(':SENS:NR5G:FRAM:COUN 1')                # Single frame
         self.VSA.write(':SENS:NR5G:FRAM:SLOT 1')                # Single Slot
         self.VSA.write(':UNIT:EVM DB')                          # EVM Units: DB PCT
-        self.VSA.write(':SENS:SWE:TIME 0.00015')                 # Capture Time
-        self.VSA.write(':CONF:NR5G:UL:CC1:RFUC:STAT OFF')       # Phase compensation
+        self.VSA.write(':SENS:SWE:TIME 0.001')                 # Capture Time
+        self.VSA.write(':CONF:NR5G:{self.ldir}:CC1:RFUC:STAT OFF')       # Phase compensation
 
     def VSA_extra(self):
-        extra = 'IQNC'
+        extra = 'none'
         if extra == 'IQNC':
             self.VSA.query(':SENS:ADJ:NCAN:AVER:STAT ON; *OPC?')            # IQNC On
             self.VSA.write(':SENS:ADJ:NCAN:AVER:COUN 10')                   # IQNC Averaging
@@ -170,7 +180,10 @@ class std_insr_driver():
     @method_timer
     def VSG_config(self):
         """Config w/ VSG 5G Quick Settings"""
-        self.VSG.write(f':SOUR1:BB:NR5G:LINK UP')               # Link Direction
+        if self.ldir == 'DL':
+            self.VSG.write(f':SOUR1:BB:NR5G:LINK DL')           # Link Direction
+        else:
+            self.VSG.write(f':SOUR1:BB:NR5G:LINK UL')           # Link Direction
         self.VSG.write(f':SOUR1:BB:NR5G:QCKS:GEN:DUPL FDD')     # FDD TDD
         self.VSG.write(f':SOUR1:BB:NR5G:QCKS:GEN:CARD FR2_1')   # FR2
         self.VSG.write(f':SOUR1:BB:NR5G:QCKS:GEN:CBW BW{self.bw}')      # BW50 BW100

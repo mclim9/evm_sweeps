@@ -61,14 +61,14 @@ class EVM_Sweep():
                     self.calc_testtime()
 
 if __name__ == '__main__':
-    # from driver.NR5G_FR1_meas import std_insr_driver              # standard to use
+    # from driver.NR5G_FR1_meas import std_insr_driver                # standard to use
+    from driver.NR5G_FR2_meas import std_insr_driver                # standard to use
     # from driver.LTE_meas import std_insr_driver                   # standard to use
-    from driver.WiFi_meas import std_insr_driver                    # standard to use
+    # from driver.WiFi_meas import std_insr_driver                  # standard to use
     sweep = EVM_Sweep()
     sweep.meas = std_insr_driver()
-    sweep.VSA_IP = '172.24.225.124'
-    sweep.VSA = bench().VSA_start('172.24.225.124')
-    sweep.freq_arry = [int(2.4e9), int(5.000e9), int(6.00e9)]       # 802.11 Freqs
-    sweep.pwr_arry = range(-45, 15, 1)
-    sweep.lvl_arry = ['LEV']                                        # LEV:autolevel EVM:autoEVM
+    # sweep.VSA = bench().VSA_start('172.24.225.124')
+    sweep.freq_arry = [int(28e9)]                              # 802.11 Freqs
+    sweep.pwr_arry = [-40, -30, -20, -10, 0]
+    sweep.lvl_arry = ['LEV', 'EVM']                             # LEV:autolevel EVM:autoEVM
     sweep.main()

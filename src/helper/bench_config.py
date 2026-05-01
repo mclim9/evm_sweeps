@@ -19,9 +19,9 @@ class bench():
 
     def VSA_start(self, ip=''):
         """Start VSA with given IP or default from config."""
-        if not ip:
-            ip = self.VSA_IP
-        self.VSA = iSocket().open(ip, 5025)
+        if ip:
+            self.VSA_IP = ip
+        self.VSA = iSocket().open(self.VSA_IP, 5025)
         return self.VSA
 
     def VSG_network_reset(self):
@@ -30,8 +30,8 @@ class bench():
 
     def VSG_start(self, ip=''):
         """Start VSA with given IP or default from config."""
-        if not ip:
-            ip = self.VSG_IP
+        if ip:
+            self.VSG_IP = ip
         self.VSG = iSocket().open(self.VSG_IP, 5025)
         return self.VSG
 
