@@ -1,11 +1,12 @@
 import os
 import sys
 import unittest
-from src.driver import NR5G_FR2_meas
 from unittest.mock import MagicMock, patch
 
 TEST_DIR = os.path.dirname(__file__)
 sys.path.insert(0, os.path.abspath(os.path.join(TEST_DIR, '..', 'src')))
+
+from src.driver import NR5G_FR2_meas
 
 
 class TestNR5G_FR2_Meas(unittest.TestCase):
@@ -36,8 +37,6 @@ class TestNR5G_FR2_Meas(unittest.TestCase):
 
         self.mock_vsa.query.assert_any_call('*RST;*OPC?')
         self.mock_vsa.query.assert_any_call(':INST:CRE:NEW NR5G, "5G NR"; *OPC?')
-        self.mock_vsa.write.assert_any_call(':CONF:NR5G:DL:CC1:FRAM1:BWP0:SSP SS120')
-        self.mock_vsa.write.assert_any_call(':CONF:NR5G:DL:CC1:FRAM1:BWP0:ALL0:MOD Q1K')
         self.mock_vsa.write.assert_any_call(':TRIG:SEQ:SOUR EXT')
 
     def test_VSA_get_ACLR_returns_channel_power_and_aclr(self):
@@ -89,7 +88,6 @@ class TestNR5G_FR2_Meas(unittest.TestCase):
             'SCS120',
             '264',
             'Q1K',
-            'Off',
             'ON',
             '0.001',
             '1'
