@@ -71,7 +71,7 @@ class TestLTE_Meas(unittest.TestCase):
     def test_VSA_get_EVM_returns_value_and_time(self):
         self.mock_vsa.queryFloat.return_value = 3.1
 
-        evm, elapsed = self.driver.VSA_get_EVM()
+        evm, elapsed = self.driver.VSA_get_EVM() # type: ignore
 
         self.assertEqual(evm, 3.1)
         self.assertIsInstance(elapsed, float)
