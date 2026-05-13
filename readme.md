@@ -1,4 +1,5 @@
 # EVM Sweeps
+[![Coverage Status](https://coveralls.io/repos/github/mclim9/evm_sweeps/badge.svg)](https://coveralls.io/github/mclim9/evm_sweeps)
 
 ## Design Goal
 - Modular reusable EVM / ACLR bathtub tool
