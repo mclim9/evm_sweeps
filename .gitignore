@@ -38,6 +38,12 @@ htmlcov
 .coveralls.yml
 test/.coverage
 /*.coverage
+.coverage
+.coverage.*
+coverage.xml
+coverage.json
+.pytest_cache/
+.hypothesis/
 
 ## R&S Files
 *.allocation
