@@ -36,6 +36,7 @@
    3. Verify *.txt created w/ data
 
 ## Program flow
+
 ```mermaid
 graph TD
     EVM_Sweep_Simple <--> Standard_Driver <--SCPI--> Instrument
@@ -65,14 +66,14 @@ graph TD
 ### 5G FR1 Benchmark Config
 - Freq: 0.7; 1.9; 3.5; 5; 7GHz
 - Pwr : -45 to +5 in 1dB steps
-- Wave: 
+- Wave:
   - 5G_FR1_UL_30KHz_SCS_100MHz_RFBW_1024QAM
   - 5G_FR1_DL_30KHz_SCS_100MHz_RFBW_1024QAM
 
 ### 5G FR2 Benchmark Config
 - Freq: 24; 28; 39; 43GHz
 - Pwr : -45 to +5 in 1dB steps
-- Wave: 
+- Wave:
   - 5G_FR2_UL_120KHz_SCS_100MHz_RFBW_1024QAM
   - 5G_FR2_DL_120KHz_SCS_100MHz_RFBW_1024QAM
 
@@ -86,7 +87,7 @@ graph TD
 ### 802.11 Benchmark Config
 - Freq: 2.4; 5.3; 5.9; 7.0GHz
 - Pwr : -45 to +5 in 1dB steps
-- Wave: 
+- Wave:
   - 802.11be_160MHz_RFBW_4096_Preamble only
   - 802.11be_160MHz_RFBW_4096_Preamble & Payload only
   - 802.11be_320MHz_RFBW_4096_Preamble only
