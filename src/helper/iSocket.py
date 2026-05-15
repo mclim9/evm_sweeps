@@ -73,7 +73,7 @@ class iSocket():
             sOut = sOut.decode()
         except socket.error:
             sOut = '<not Read>'
-        logging.info(f'Read < {sOut}')
+        # logging.info(f'Read < {sOut}')  # debug:MMM
         # print(f'Read < {sOut}')
         return sOut
 
@@ -115,7 +115,7 @@ class iSocket():
 
     def write(self, SCPI):                          # noqa: E302
         """Socket Write"""
-        logging.info(f'Write> {SCPI.strip()}')
+        # logging.info(f'Write> {SCPI.strip()}')      # debug:MMM
         self.s.sendall(f'{SCPI}\n'.encode())        # Write 'SCPI'
 
     def writeBin(self, SCPI):                       # noqa: E302

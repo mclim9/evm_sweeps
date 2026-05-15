@@ -1,15 +1,16 @@
 from helper.utils import method_timer, std_meas, std_config
-from helper.bench_config import bench
+from helper.bench_config import BenchConfig
+from driver.base import InstrumentDriver
 import os
 
-class std_insr_driver():
+class std_insr_driver(InstrumentDriver):
     """FSx & SMx 5GNR FR2 driver"""
 
-    def __init__(self):
+    def __init__(self, VSA=None, VSG=None):
         """Initialize instrument connections and default parameters."""
-        self.VSA = bench().VSA_start()
+        self.VSA = VSA or BenchConfig().VSA_start()
         self.VSA.s.settimeout(30)   # For AutoEVM
-        self.VSG = bench().VSG_start()
+        self.VSG = VSG or BenchConfig().VSG_start()
         self.freq = 18e9            # Center Frequency, Hz: 24e9; 28e9; 39e9; 43e9
         self.scs  = 120             # Sub Carr Spacing: 60; 120;
         self.rb   = 264             # number RB
@@ -18,8 +19,13 @@ class std_insr_driver():
         self.pwr  = -10             # VSG Initial power
         self.ldir = 'DL'            # Link Direction: 'UL' or 'DL'
 
-    @method_timer
-    def VSA_config(self):
+    def set_frequency(self, freq: float) -> None:
+        """Configures both VSG & VSA to frequency"""
+        # self.VSA.write(f':CONF:NR5G:GMCF {freq}')                     # Ana CA Center Freq
+        self.VSA.write(f':SENSE:FREQ:CENT {freq}')                      # Ana CC Center Freq
+        self.VSG.write(f':SOUR1:FREQ:CW {freq}')                        # Generator center freq
+
+    def vsa_configure(self) -> None:
         """VSA Config Before start of test suite"""
         self.VSA.query('*RST;*OPC?')                                # Reset
         self.VSA.query(':SYST:DISP:UPD ON; *OPC?')                  # Display on
@@ -29,12 +35,10 @@ class std_insr_driver():
         self.VSA.write(f':CONF:NR5G:{self.ldir}:CC1:BW BW{self.bw}') # BW
 
         if self.ldir == 'DL':
-            chan = 1
             self.VSA.write(f':CONF:NR5G:{self.ldir}:CC1:FRAM1:BWP:ADD')   # add BWP
             self.VSA.write(f':CONF:NR5G:DL:CC1:FRAM1:BWP0:SLOT0:CRSC 0')  # Corset off
 
         elif self.ldir == 'UL':
-            chan = 2
             self.VSA.write(f':CONF:NR5G:{self.ldir}:CC1:TPR OFF')   # TPrecode
 
         self.VSA.write(f':CONF:NR5G:{self.ldir}:CC1:FRAM1:BWP0:SSP SS{self.scs}') # SCS
@@ -55,7 +59,7 @@ class std_insr_driver():
         self.VSA.write(':SENS:SWE:TIME 0.001')                 # Capture Time
         self.VSA.write(':CONF:NR5G:{self.ldir}:CC1:RFUC:STAT OFF')       # Phase compensation
 
-    def VSA_extra(self):
+    def vsa_get_extra(self) -> str:
         extra = 'none'
         if extra == 'IQNC':
             self.VSA.query(':SENS:ADJ:NCAN:AVER:STAT ON; *OPC?')            # IQNC On
@@ -63,20 +67,20 @@ class std_insr_driver():
         return extra
 
     @method_timer
-    def VSA_get_ACLR(self):
+    def vsa_get_ACLR(self):
         """Get VSA ACLR.
 
         Returns:
             tuple: (Channel Power(float), ACLR(float))
         """
         self.VSA.write(':CONF:NR5G:MEAS ACLR')
-        self.VSA_sweep()
+        self.vsa_sweep()
         chPwr = self.VSA.query(':CALC:MARK:FUNC:POW:RES? CPOW')         # Channel Power
         ACLRV = self.VSA.query(':CALC:MARK:FUNC:POW:RES? ACP')          # ACLR Relative
         print(f'{chPwr} {ACLRV}')
         return chPwr, ACLRV
 
-    def VSA_get_attn_reflvl(self):
+    def vsa_get_attn_ref(self):
         """Get VSA input atten and ref level.
 
         Returns:
@@ -86,7 +90,7 @@ class std_insr_driver():
         refl = self.VSA.queryFloat('DISP:TRAC:Y:SCAL:RLEV?')            # Ref Level
         return attn, refl
 
-    def VSA_get_chPwr(self):
+    def vsa_get_ch_power(self) -> float:
         """Get VSA channel power from result summary
 
         Returns:
@@ -96,22 +100,22 @@ class std_insr_driver():
         return chPw
 
     @method_timer
-    def VSA_get_EVM(self):
+    def vsa_get_evm(self):
         """Takes a sweep then returns VSA EVM
 
         Returns:
             EVM(float) : EVM as defined by standard
         """
         try:
-            self.VSA_sweep()                                            # Take a sweep
+            self.vsa_sweep()                                            # Take a sweep
             EVM = self.VSA.queryFloat(':FETC:CC1:SUMM:EVM:ALL:AVER?')   # VSA CW
         except:                                                         # noqa
             print('EVM 2nd Try')
-            self.VSA_sweep()                                            # Take a sweep
+            self.vsa_sweep()                                            # Take a sweep
             EVM = self.VSA.queryFloat(':FETC:CC1:SUMM:EVM:ALL:AVER?')   # VSA CW
         return EVM
 
-    def VSA_get_info(self):
+    def vsa_get_waveform_info(self) -> str:
         """VSA standard config detail string
 
         Returns:
@@ -137,8 +141,10 @@ class std_insr_driver():
         print(outStr)
         return outStr
 
-    @method_timer
-    def VSA_level(self, method='LEV'):
+    def vsa_level(self, method='LEV'):
+        return self.vsa_set_level(method)
+
+    def vsa_set_level(self, method='LEV') -> float:
         """Adjust VSA level settings.
 
         Args:
@@ -152,10 +158,11 @@ class std_insr_driver():
             self.VSA.query(f':SENS:ADJ:LEV;*OPC?')                      # Autolevel
         else:
             self.VSA.write(f':INP:ATT:AUTO ON')                         # AutoAttenuation
-            pwr = self.get_VSA_chPwr()
+            pwr = self.vsa_get_ch_power()
             self.VSA.write(f':DISP:WIND:TRAC:Y:SCAL:RLEV {pwr - 2}')    # Manually set ref level
+        return 0.0
 
-    def VSA_load(self, file):
+    def vsa_load(self, file):
         """Load VSA demodulation state from file.
 
         Args:
@@ -163,7 +170,7 @@ class std_insr_driver():
         """
         self.VSA.write(f':MMEM:LOAD:DEM:C1 "{file}"')
 
-    def VSA_save_state(self):
+    def vsa_save_state(self):
         """VSA Save 5G State"""
         self.VSA.query(f'*IDN?')
         self.VSA.query(f'MMEM:STOR:DEM "C:\\R_S\\instr\\{self.Wavename}.allocation";*OPC?')
@@ -172,13 +179,16 @@ class std_insr_driver():
         os.system(f'start \\\\{FSW_IP}\\instr')
 
     @method_timer
-    def VSA_sweep(self):
+    def vsa_sweep(self):
         """VSA take a single sweep"""
         self.VSA.write('INIT:CONT OFF')
         self.VSA.query('INIT:IMM;*OPC?')
 
+    def vsg_config(self):
+        return self.vsg_configure()
+
     @method_timer
-    def VSG_config(self):
+    def vsg_configure(self) -> None:
         """Config w/ VSG 5G Quick Settings"""
         if self.ldir == 'DL':
             self.VSG.write(f':SOUR1:BB:NR5G:LINK DL')           # Link Direction
@@ -199,16 +209,16 @@ class std_insr_driver():
         self.VSG.query(':SOUR1:CORR:OPT:EVM 1;*OPC?')           # Optimize EVM
         self.VSG.write(':SOUR1:BB:NR5G:TRIG:OUTP1:MODE REST')   # Maker Mode Arb Restart
         self.VSG.write(':SOUR1:BB:NR5G:NODE:RFPH:MODE 0')       # Phase Compensation Off
-        self.VSG_pwr(self.pwr)                                  # Initial VSG power
+        self.vsg_set_power(self.pwr)                            # Initial VSG power
         self.VSG.query('*OPC?')
 
-    def VSG_extra(self):
+    def vsg_get_extra(self) -> str:
         return 'none'
 
-    def VSG_pwr(self, pwr):
+    def vsg_set_power(self, pwr: float) -> None:
         self.VSG.write(f':SOUR1:POW:POW {pwr}')                         # VSG Power
 
-    def VSG_save_state(self):
+    def vsg_save_state(self):
         """VSG Save 5G State"""
         self.VSG.query(f'*IDN?')
         Band = self.VSG.query(':SOUR1:BB:NR5G:NODE:CELL0:CARD?')
@@ -231,15 +241,9 @@ class std_insr_driver():
         SMW_IP = self.VSG.s.getpeername()[0]                            # Instr
         os.system(f'start \\\\{SMW_IP}\\user')
 
-    def VSx_freq(self, freq):
-        """Configures both VSG & VSA to frequency"""
-        # self.VSA.write(f':CONF:NR5G:GMCF {freq}')                     # Ana CA Center Freq
-        self.VSA.write(f':SENSE:FREQ:CENT {freq}')                      # Ana CC Center Freq
-        self.VSG.write(f':SOUR1:FREQ:CW {freq}')                        # Generator center freq
-
 
 if __name__ == '__main__':
     std_config(std_insr_driver())
     std_meas(std_insr_driver())
     instr = std_insr_driver()
-    instr.VSA_get_ACLR()
+    instr.vsa_get_ACLR()

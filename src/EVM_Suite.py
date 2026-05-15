@@ -1,20 +1,29 @@
-from EVM_Sweep_Simple import EVM_Sweep
+from pathlib import Path
+import logging
 
-def main():
-    from driver.NR5G_FR1_meas import std_insr_driver            # standard to use
-    sweep = EVM_Sweep()
-    sweep.meas = std_insr_driver()
-    sweep.freq_arry = [int(1.00e9), int(2.00e9), int(3.00e9), int(4.00e9), int(5.00e9), int(6.00e9), int(7.00e9)]    # FR1 Freqs
-    sweep.pwr_arry = range(-45, 15, 1)
-    sweep.lvl_arry = ['LEV']                                    # LEV:autolevel EVM:autoEVM
-    sweep.main()
+from helper.bench_config import BenchConfig
+from EVM_Sweep import SweepConfig, SweepRunner
+from driver.wifi_vsa_fsw import WiFi_VSA
+from driver.wifi_vsg_pvt import WiFi_VSG
 
-    from driver.WiFi_meas import std_insr_driver                # standard to use
-    sweep.meas = std_insr_driver()
-    sweep.freq_arry = [int(2.4e9), int(5.000e9), int(6.00e9)]   # 802.11 Freqs
-    sweep.pwr_arry = range(-45, 15, 1)
-    sweep.lvl_arry = ['LEV']                                    # LEV:autolevel EVM:autoEVM
-    sweep.main()
+
+def main() -> None:
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+
+    bench = BenchConfig()
+    vsa = WiFi_VSA(bench.VSA_start())
+    vsg = WiFi_VSG(bench.VSG_start())
+
+    config = SweepConfig(
+        freq_arry=[int(2.4e9), int(5.0e9), int(6.0e9)],
+        pwr_arry=range(-45, 15, 1),
+        lvl_arry=['LEV'],
+        output_dir=Path('results'),
+        file_prefix='wifi_evm_sweep'
+    )
+
+    runner = SweepRunner(vsa, vsg, config)
+    runner.run()
 
 
 if __name__ == '__main__':

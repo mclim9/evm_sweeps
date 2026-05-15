@@ -69,7 +69,7 @@ class plotter():
         bathTub = self.df
         # df = df[df['lvling'].str.contains('EVM')]                               # filter data   | Up Lt
         self.Cols = ['Freq', 'Leveling', 'VSG', 'VSA']                          # Split Traces  | Up Rt
-        self.Xval = ['Power [dBm]']                                             # X Values      | Dn Lt
+        self.Xval = ['Power[dBm]']                                             # X Values      | Dn Lt
         self.Yval = ['EVM[dB]']                                                 # Y Values      | Dn Rt
         self.aggg = 'mean'                                                      # mean | sum
         self.table = pd.pivot_table(bathTub, values=self.Yval, index=self.Xval, columns=self.Cols, aggfunc=self.aggg)
