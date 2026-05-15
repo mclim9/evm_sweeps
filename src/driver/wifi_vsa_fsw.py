@@ -2,9 +2,9 @@ from typing import Tuple
 from helper.utils import method_timer
 from helper.bench_config import BenchConfig
 from driver.base_vsa import VSADriver
+import os
 
-
-class WiFi_VSA(VSADriver):
+class VSA_driver(VSADriver):
     def __init__(self, VSA=None):
         self.VSA = VSA or BenchConfig().VSA_start()
         self.VSA.s.settimeout(30)   # For AutoEVM
@@ -56,6 +56,26 @@ class WiFi_VSA(VSADriver):
         # rtnStr = f"{freq}GHz_{std}_{bw}_{mcs}_{data}A-MPDU"
         rtnStr = "6.0GHz_11AC_160_MCS0_1234A-MPDU"
         return rtnStr
+
+    def vsa_save_state(self):
+        """VSA Save State"""
+        self.VSA.query(f'*IDN?')
+        # BW   = self.VSA.query(':SENS:BAND:CHAN:AUTO:TYPE?')
+        BW   = self.VSA.queryInt(':TRAC:IQ:SRAT?') / 1e6
+        PCKT = self.VSA.query(':FETC:BURS:PPDU:TYPE?')
+        Dir  = self.VSA.query(':CONF:WLAN:RUC:EHTP?')
+        Mod  = self.VSA.query(':CONF:WLAN:RUC:SEGM1:CHAN1:RUL1:USER1:MCS?')
+        RUS  = self.VSA.query(':CONF:WLAN:RUC:SEGM1:CHAN1:RUL1:RUS?')
+        # Pwr  = self.VSA.query(':FETC:BURS:PAYL?')
+        # EVM  = self.VSA.query(':FETC:BURS:EVM:ALL:AVER?')
+        if Dir == 'MU':
+            Dir = 'Down'
+        else:
+            Dir = 'Up'
+        self.Wavename = f'WiFi{BW}_{PCKT}_{Dir}_{RUS}_MCS{Mod}'
+        self.VSA.query(f':MMEM:STOR:STAT 1,"C:\\R_S\\instr\\{self.Wavename}.dfl";*OPC?')
+        FSW_IP = self.VSA.s.getpeername()[0]                    # Instr
+        os.system(f'start \\\\{FSW_IP}')
 
     def vsa_set_frequency(self, freq: float) -> None:
         self.VSA.write(f":SENSE:FREQ:CENT {freq}")

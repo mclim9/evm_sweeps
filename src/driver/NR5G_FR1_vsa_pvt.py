@@ -3,7 +3,7 @@ from helper.bench_config import BenchConfig
 from driver.base_vsa import VSADriver
 import os
 
-class NR5G_FR1_vsa(VSADriver):
+class VSA_driver(VSADriver):
     def __init__(self, VSA=None):
         self.VSA = VSA or BenchConfig().VSA_start()
         self.VSA.s.settimeout(30)       # For AutoEVM

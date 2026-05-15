@@ -5,13 +5,12 @@ from pathlib import Path
 import datetime
 import timeit
 import logging
-from typing import Iterable
 
 
 @dataclass
 class SweepConfig:
     freq_arry: list[float]
-    pwr_arry: Iterable[int]
+    pwr_arry: list[int]
     lvl_arry: list[str]
     output_dir: Path = Path("results")
     file_prefix: str = "evm_sweep"

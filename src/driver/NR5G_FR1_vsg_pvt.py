@@ -3,7 +3,7 @@ from helper.bench_config import BenchConfig
 from driver.base_vsg import VSGDriver
 
 
-class WiFi_VSG(VSGDriver):
+class VSG_driver(VSGDriver):
     def __init__(self, VSG=None):
         self.VSG = VSG or BenchConfig().VSG_start()
 

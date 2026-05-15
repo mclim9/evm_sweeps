@@ -3,7 +3,7 @@ from helper.bench_config import BenchConfig
 from driver.base_vsa import VSADriver
 import os
 
-class NR5G_FR1_vsa(VSADriver):
+class VSA_driver(VSADriver):
     def __init__(self, VSA=None):
         self.VSA = VSA or BenchConfig().VSA_start()
         self.VSA.s.settimeout(30)       # For AutoEVM
@@ -194,7 +194,7 @@ class NR5G_FR1_vsa(VSADriver):
         self.VSA.query('INIT:IMM;*OPC?')
 
 if __name__ == '__main__':
-    std_config(NR5G_FR1_vsa())
-    std_meas(NR5G_FR1_vsa())
-    instr = NR5G_FR1_vsa()
+    std_config(VSA_driver())
+    std_meas(VSA_driver())
+    instr = VSA_driver()
     instr.vsa_get_ACLR()

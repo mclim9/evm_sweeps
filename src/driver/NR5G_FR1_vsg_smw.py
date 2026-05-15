@@ -3,7 +3,7 @@ from helper.bench_config import BenchConfig
 from driver.base_vsg import VSGDriver
 import os
 
-class NR5G_FR1_vsg(VSGDriver):
+class VSG_driver(VSGDriver):
     def __init__(self, VSG=None):
         """Initialize instrument connections and default parameters."""
         self.VSG = VSG or BenchConfig().VSG_start()
@@ -72,6 +72,6 @@ class NR5G_FR1_vsg(VSGDriver):
 
 
 if __name__ == '__main__':
-    std_config(NR5G_FR1_vsg())
-    std_meas(NR5G_FR1_vsg())
-    instr = NR5G_FR1_vsg()
+    std_config(VSG_driver())
+    std_meas(VSG_driver())
+    instr = VSG_driver()
