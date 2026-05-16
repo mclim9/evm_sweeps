@@ -7,7 +7,6 @@ class VSA_driver(VSADriver):
     def __init__(self, VSA=None):
         self.VSA = VSA or BenchConfig().VSA_start()
         self.VSA.s.settimeout(30)       # For AutoEVM
-        self.base_path = "~"
         self.base_path = "/home/instrument"
 
     @method_timer
@@ -17,7 +16,7 @@ class VSA_driver(VSADriver):
         self.VSA.query(':SYST:DISP:UPD ON; *OPC?')              # Display on
         self.VSA.query(':INST:CRE:NEW AMPL, "Amplifier"; *OPC?') # Start Amplifier mode
         wv_file = "WLAN_802.11ax_160_mcs13_burst0.180ms_duty0.5.wv"
-        self.VSA.write(f':CONF:REFS:CWF:FPAT "`{self.base_path}/`{wv_file}"')                    # Set Gen Func to CW
+        self.VSA.write(f':CONF:REFS:CWF:FPAT "{self.base_path}/{wv_file}"')                    # Set Gen Func to CW
         # self.VSA.write(':CONF:GEN:IPC:ADDR "192.168.8.20"')     # SMW IP
         # self.VSA.query(':CONF:GEN:CONN:STAT ON;*OPC?')          # Wait to connect
 
