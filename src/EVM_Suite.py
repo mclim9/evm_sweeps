@@ -3,7 +3,8 @@ import logging
 
 from helper.bench_config import BenchConfig
 from EVM_Sweep import SweepConfig, SweepRunner
-from driver.wifi_vsa_fsw import VSA_driver
+# from driver.wifi_vsa_fsw import VSA_driver
+from driver.K18_vsa_fsw import VSA_driver
 from driver.wifi_vsg_pvt import VSG_driver
 
 

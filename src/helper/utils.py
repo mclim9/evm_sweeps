@@ -36,7 +36,7 @@ def std_meas(林):
     EVMM = 林.VSA_get_EVM()[0]
     ACLR = 林.VSA_get_ACLR()[0]
     chPw = 林.VSA_get_chPwr()
-    print(f'EVM:{EVMM:.2f} CH_Pwr:{chPw:.2f} ACLR:{ACLR}')
+    print(f'EVM:{EVMM:6.2f} CH_Pwr:{chPw:6.2f} ACLR:{ACLR}')
 
 @method_timer
 def test(inString):
@@ -45,7 +45,9 @@ def test(inString):
 
 
 if __name__ == '__main__':
-    from driver.WiFi_meas import std_insr_driver                    # standard to use
+    from driver.wifi_vsa_fsw import VSA_driver
+    from driver.wifi_vsg_pvt import VSG_driver
+    from helper.bench_config import BenchConfigstd_insr_driver                    # standard to use
 
     meas = std_insr_driver()
     std_config(meas)

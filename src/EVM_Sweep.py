@@ -65,7 +65,7 @@ class SweepRunner:
                     step += 1
 
                     self.vsg.vsg_set_power(power)
-                    level_time = self.vsa.vsa_set_level(mode)
+                    level_time = self.vsa.vsa_set_level(mode)[1]
                     vsa_extra = self.vsa.vsa_get_extra()
                     vsg_extra = self.vsg.vsg_get_extra()
                     evm, evm_time = self.vsa.vsa_get_evm()

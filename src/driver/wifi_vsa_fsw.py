@@ -80,6 +80,7 @@ class VSA_driver(VSADriver):
     def vsa_set_frequency(self, freq: float) -> None:
         self.VSA.write(f":SENSE:FREQ:CENT {freq}")
 
+    @method_timer
     def vsa_set_level(self, mode: str) -> float:
         if mode == "LEV" or mode == "EVM":
             self.VSA.query(":CONF:POW:AUTO ONCE;*OPC?")
