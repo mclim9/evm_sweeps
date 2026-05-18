@@ -45,7 +45,14 @@ class VSA_driver(VSADriver):
         return evm
 
     def vsa_get_extra(self) -> str:
-        return "none"
+        extra = 'none'  # 'XCORR' or 'IQNC'
+        if extra == 'IQNC':
+            self.VSA.query(':SENS:ADJ:NCAN:AVER:STAT ON; *OPC?')        # IQNC On
+            self.VSA.write(':SENS:ADJ:NCAN:AVER:COUN 10')               # IQNC Averaging
+        elif extra == 'XCORR':
+            self.VSA.query(':SENS:IQ:XCOR:STAT ON; *OPC?')              # XCorr On
+        extra = f'WiFi EVM {extra}'
+        return extra
 
     def vsa_get_waveform_info(self) -> str:
         # freq = int(self.VSG.query(":SOUR1:FREQ:CW?")) / 1e9
@@ -84,9 +91,8 @@ class VSA_driver(VSADriver):
     def vsa_set_level(self, mode: str) -> float:
         if mode == "LEV" or mode == "EVM":
             self.VSA.query(":CONF:POW:AUTO ONCE;*OPC?")
-            return 0.0
-
-        self.VSA.write(":INP:ATT:AUTO ON")
-        pwr = self.vsa_get_ch_power()
-        self.VSA.write(f":DISP:WIND:TRAC:Y:SCAL:RLEV {pwr - 2}")
+        else:
+            self.VSA.write(f':INP:ATT:AUTO ON')                         # AutoAttenuation
+            pwr = self.vsa_get_ch_power()
+            self.VSA.write(f':FETC:POW:OUTP:CURR:RES {pwr - 2}')        # Manually set ref level
         return 0.0

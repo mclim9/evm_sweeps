@@ -2,6 +2,7 @@ from helper.utils import method_timer
 from helper.bench_config import BenchConfig
 from driver.base_vsa import VSADriver
 import os
+from tkinter import Tk, messagebox as tkMessageBox
 
 class VSA_driver(VSADriver):
     def __init__(self, VSA=None):
@@ -19,6 +20,8 @@ class VSA_driver(VSADriver):
         self.VSA.write(f':CONF:REFS:CWF:FPAT "{self.base_path}/{wv_file}"')                    # Set Gen Func to CW
         # self.VSA.write(':CONF:GEN:IPC:ADDR "192.168.8.20"')     # SMW IP
         # self.VSA.query(':CONF:GEN:CONN:STAT ON;*OPC?')          # Wait to connect
+        tkMessageBox.showinfo(title="FSWX KM118", message="Verify waveform loaded")
+
 
         # Additional Settings
         self.VSA.write(':CONF:EVM:UNIT DB')                     # EVM Unit to dB
@@ -39,7 +42,8 @@ class VSA_driver(VSADriver):
             tuple: (attenuation, reference_level)
         """
         attn = self.VSA.query('INP:ATT?')                               # Input Attn
-        refl = self.VSA.queryFloat(':INP1:RLEV?')                       # Ref Level
+        refl = self.VSA.queryFloat('INP:RLEV?')                         # Ref Level
+        prea = self.VSA.query('INP:GAIN:STAT?')                         # Preamp Auto
         return attn, refl
 
     def vsa_get_ch_power(self) -> float:
@@ -64,6 +68,7 @@ class VSA_driver(VSADriver):
             self.VSA.write(':SENS:ADJ:NCAN:AVER:COUN 10')               # IQNC Averaging
         elif extra == 'XCORR':
             self.VSA.query(':SENS:IQ:XCOR:STAT ON; *OPC?')              # XCorr On
+        extra = f'K18 EVM {extra}'
         return extra
 
     def vsa_get_waveform_info(self) -> str:
@@ -90,7 +95,7 @@ class VSA_driver(VSADriver):
         else:
             self.VSA.write(f':INP:ATT:AUTO ON')                         # AutoAttenuation
             pwr = self.vsa_get_ch_power()
-            self.VSA.write(f':FETC:POW:OUTP:CURR:RES {pwr - 2}')        # Manually set ref level
+            self.VSA.write(f'INP:RLEV {pwr - 2}')                       # Manually set ref level
         return 0.0
 
     def vsa_load(self, file):
