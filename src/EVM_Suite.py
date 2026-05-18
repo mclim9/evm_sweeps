@@ -19,7 +19,8 @@ def main() -> None:
     vsg = VSG_driver(bench.VSG_start())
 
     config = SweepConfig(
-        freq_arry=[int(2.4e9), int(5.0e9), int(6.0e9)],
+        # freq_arry=[int(2.4e9), int(5.0e9), int(6.0e9)],         # WiFi
+        freq_arry=[int(1.00e9), int(2.00e9), int(3.00e9), int(4.00e9), int(5.00e9)],         # FR1
         pwr_arry=list(range(-45, 15, 1)),
         lvl_arry=['MAN'],
         output_dir=Path('results'),

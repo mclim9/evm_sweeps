@@ -1,7 +1,15 @@
+import os
+import sys
+
+# Add src directory to path for imports when running standalone
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+SRC_DIR = os.path.abspath(os.path.join(CURRENT_DIR, '..'))
+if SRC_DIR not in sys.path:
+    sys.path.insert(0, SRC_DIR)
+
 from helper.utils import method_timer
 from helper.bench_config import BenchConfig
 from driver.base_vsa import VSADriver
-import os
 from tkinter import Tk, messagebox as tkMessageBox
 
 class VSA_driver(VSADriver):
@@ -21,7 +29,6 @@ class VSA_driver(VSADriver):
         # self.VSA.write(':CONF:GEN:IPC:ADDR "192.168.8.20"')     # SMW IP
         # self.VSA.query(':CONF:GEN:CONN:STAT ON;*OPC?')          # Wait to connect
         tkMessageBox.showinfo(title="FSWX KM118", message="Verify waveform loaded")
-
 
         # Additional Settings
         self.VSA.write(':CONF:EVM:UNIT DB')                     # EVM Unit to dB
@@ -94,8 +101,9 @@ class VSA_driver(VSADriver):
             self.VSA.query(f':SENS:ADJ:LEV;*OPC?')                      # Autolevel
         else:
             self.VSA.write(f':INP:ATT:AUTO ON')                         # AutoAttenuation
+            self.vsa_sweep()                                            # Take a sweep to update channel
             pwr = self.vsa_get_ch_power()
-            self.VSA.write(f'INP:RLEV {pwr - 2}')                       # Manually set ref level
+            self.VSA.write(f'INP:RLEV {pwr + 2}')                       # Manually set ref level
         return 0.0
 
     def vsa_load(self, file):
@@ -116,4 +124,9 @@ class VSA_driver(VSADriver):
         self.VSA.query('INIT:IMM;*OPC?')
 
 if __name__ == '__main__':
-    pass
+    林 = VSA_driver(BenchConfig().VSA_start())
+    林.vsa_configure()
+    林.vsa_set_frequency(6e9)
+    林.vsa_sweep()
+    林.vsa_set_level('MAN')
+    林.vsa_get_evm()

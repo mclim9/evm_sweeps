@@ -1,7 +1,15 @@
-from helper.utils import method_timer, std_meas, std_config
+import os
+import sys
+
+# Add src directory to path for imports when running standalone
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+SRC_DIR = os.path.abspath(os.path.join(CURRENT_DIR, '..'))
+if SRC_DIR not in sys.path:
+    sys.path.insert(0, SRC_DIR)
+
+from helper.utils import method_timer
 from helper.bench_config import BenchConfig
 from driver.base_vsa import VSADriver
-import os
 
 class VSA_driver(VSADriver):
     def __init__(self, VSA=None):
@@ -30,7 +38,7 @@ class VSA_driver(VSADriver):
         self.VSA.write(f':CONF:NR5G:UL:CC1:FRAM1:BWP0:RBOF {self.rbo}') # BWP RB Offset
         self.VSA.write(f':CONF:NR5G:UL:CC1:FRAM1:BWP0:SLOT0:ALL0:RBC {self.rb}')
         self.VSA.write(f':CONF:NR5G:UL:CC1:FRAM1:BWP0:SLOT0:ALL0:RBOF {self.rbo}')
-        self.VSA.write(':CONF:NR5G:UL:CC1:FRAM1:BWP0:SLOT0:ALL0:MOD Q1K')
+        self.VSA.write(':CONF:NR5G:UL:CC1:FRAM1:BWP0:SLOT0:ALL0:MOD QAM64')   # Q1k; QAM64; QAM256
 
         # Results Table Data Removal
         self.VSA.write(':INIT:CONT OFF')                        #
@@ -117,6 +125,7 @@ class VSA_driver(VSADriver):
             self.VSA.write(':SENS:ADJ:NCAN:AVER:COUN 10')                   # IQNC Averaging
         elif extra == 'XCORR':
             self.VSA.query(':SENS:IQ:XCOR:STAT ON; *OPC?')                  # XCorr On
+        extra = f'5GNR EVM {extra}'
         return extra
 
     def vsa_get_waveform_info(self) -> str:
@@ -150,25 +159,18 @@ class VSA_driver(VSADriver):
         """Configures both VSG & VSA to frequency"""
         # self.VSA.write(f':CONF:NR5G:GMCF {freq}')                     # Ana CA Center Freq
         self.VSA.write(f':SENSE:FREQ:CENT {freq}')                      # Ana CC Center Freq
-        self.VSG.write(f':SOUR1:FREQ:CW {freq}')                        # Generator center freq
 
     @method_timer
     def vsa_set_level(self, method='LEV') -> float:
-        """Adjust VSA level settings.
-
-        Args:
-            method (str): 'LEV' for autolevel
-                          'EVM' for autoEVM (if available)
-                          'MAN' for manually set
-        """
         if 'EVM' in method:
             self.VSA.query(f':SENS:ADJ:EVM;*OPC?')                      # AutoEVM
         elif 'LEV' in method:
             self.VSA.query(f':SENS:ADJ:LEV;*OPC?')                      # Autolevel
         else:
             self.VSA.write(f':INP:ATT:AUTO ON')                         # AutoAttenuation
+            self.vsa_sweep()                                            # Take a sweep to update channel
             pwr = self.vsa_get_ch_power()
-            self.VSA.write(f':DISP:WIND:TRAC:Y:SCAL:RLEV {pwr - 2}')    # Manually set ref level
+            self.VSA.write(f'INP:RLEV {pwr + 2}')                       # Manually set ref level
         return 0.0
 
     def vsa_load(self, file):
@@ -194,7 +196,9 @@ class VSA_driver(VSADriver):
         self.VSA.query('INIT:IMM;*OPC?')
 
 if __name__ == '__main__':
-    std_config(VSA_driver())
-    std_meas(VSA_driver())
-    instr = VSA_driver()
-    instr.vsa_get_ACLR()
+    林 = VSA_driver(BenchConfig().VSA_start())
+    林.vsa_configure()
+    林.vsa_set_frequency(6e9)
+    林.vsa_sweep()
+    林.vsa_set_level('MAN')
+    林.vsa_get_evm()
