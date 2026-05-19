@@ -28,7 +28,7 @@ class VSA_driver(VSADriver):
         self.VSA.write(f':CONF:REFS:CWF:FPAT "{self.base_path}/{wv_file}"')                    # Set Gen Func to CW
         # self.VSA.write(':CONF:GEN:IPC:ADDR "192.168.8.20"')     # SMW IP
         # self.VSA.query(':CONF:GEN:CONN:STAT ON;*OPC?')          # Wait to connect
-        tkMessageBox.showinfo(title="FSWX KM118", message="Verify waveform loaded")
+        # tkMessageBox.showinfo(title="FSWX KM118", message="Verify waveform loaded")
 
         # Additional Settings
         self.VSA.write(':CONF:EVM:UNIT DB')                     # EVM Unit to dB
