@@ -24,9 +24,6 @@ class TestK18VSAFSW(unittest.TestCase):
         self.mock_bench_instance = self.mock_bench_class.return_value
         self.mock_bench_instance.VSA_start.return_value = self.mock_vsa
 
-        # Instantiate the driver under test
-        # Note: Following the pattern of other VSA drivers, it likely doesn't
-        # require arguments and gets connections from BenchConfig.
         self.driver = VSA_driver()
 
         # Provide a mock VSG if the driver expects it for frequency settings
@@ -49,7 +46,6 @@ class TestK18VSAFSW(unittest.TestCase):
         _, elapsed = self.driver.vsa_configure()
 
         self.mock_vsa.query.assert_any_call('*RST;*OPC?')
-        # K18 is the Amplifier option on FSW
         self.mock_vsa.query.assert_any_call(':INST:CRE:NEW AMPL, "Amplifier"; *OPC?')
         self.assertIsInstance(elapsed, float)
 
@@ -79,10 +75,9 @@ class TestK18VSAFSW(unittest.TestCase):
 
     def test_vsa_get_extra(self):
         """Test vsa_get_extra default value."""
-        self.assertEqual(self.driver.vsa_get_extra(), 'none')
+        self.assertEqual(self.driver.vsa_get_extra(), 'K18 EVM none')
 
     def test_vsa_set_frequency(self):
-        """Test frequency update on both VSA and VSG."""
         self.driver.vsa_set_frequency(5.0e9)
         self.mock_vsa.write.assert_called_with(':SENS1:FREQ:CENT 5000000000.0')
 

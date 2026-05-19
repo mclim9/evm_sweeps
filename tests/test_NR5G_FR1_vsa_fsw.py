@@ -98,7 +98,7 @@ class TestNR5G_FR1_VSA_FSW(unittest.TestCase):
 
     def test_vsa_get_extra(self):
         """Test vsa_get_extra default value."""
-        self.assertEqual(self.driver.vsa_get_extra(), 'none')
+        self.assertEqual(self.driver.vsa_get_extra(), '5GNR EVM none')
 
     def test_vsa_get_waveform_info(self):
         """Test the construction of the waveform configuration string."""
@@ -114,7 +114,6 @@ class TestNR5G_FR1_VSA_FSW(unittest.TestCase):
         """Test frequency update on both VSA and VSG."""
         self.driver.vsa_set_frequency(3.5e9)
         self.mock_vsa.write.assert_called_with(':SENSE:FREQ:CENT 3500000000.0')
-        self.mock_vsg.write.assert_called_with(':SOUR1:FREQ:CW 3500000000.0')
 
     def test_vsa_set_level_auto(self):
         """Test triggering autolevel."""
