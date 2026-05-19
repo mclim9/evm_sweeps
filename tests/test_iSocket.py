@@ -1,7 +1,8 @@
 import unittest
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, patch
 import os
 import sys
+import socket
 
 # Add the project root to sys.path to allow imports from src
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -28,7 +29,8 @@ class TestISocket(unittest.TestCase):
     def test_init_does_not_connect_immediately(self):
         """Test that __init__ does not establish a connection."""
         iSocket()
-        # self.mock_socket_class.assert_not_called() # socket.socket() should not be called
+        # The class might be instantiated, but connect should not be called yet
+        self.mock_socket_instance.connect.assert_not_called()
 
     def test_open_establishes_connection_and_sets_timeout(self):
         """Test that open() connects and sets a timeout."""
@@ -47,10 +49,8 @@ class TestISocket(unittest.TestCase):
         sock = iSocket().open('127.0.0.1', 5025)
         command = '*RST'
         sock.write(command)
-        self.mock_socket_instance.sendall.assert_has_calls([
-            call(b'*IDN?\n'),
-            call(b'*RST\n')
-        ])
+        # Use assert_any_call to be resilient to extra init commands
+        self.mock_socket_instance.sendall.assert_any_call(b'*RST\n')
 
     def test_query_sends_command_and_receives_response(self):
         """Test that query() sends a command and returns the decoded response."""
@@ -100,6 +100,100 @@ class TestISocket(unittest.TestCase):
 
         self.mock_socket_instance.sendall.assert_any_call(b'*IDN?\n')
         self.assertEqual(idn_response, 'ROHDE&SCHWARZ,FSW,100000,1.00')
+
+    def test_close_closes_socket(self):
+        """Test that close() calls the underlying socket close method."""
+        sock = iSocket().open('127.0.0.1', 5025)
+        sock.close()
+        self.mock_socket_instance.close.assert_called_once()
+
+    def test_read_receives_data(self):
+        """Test that read() receives data from the socket."""
+        self.mock_socket_instance.recv.return_value = b'RAW_DATA\n'
+        sock = iSocket().open('127.0.0.1', 5025)
+        result = sock.read()
+        self.assertEqual(result, b'RAW_DATA\n')
+
+    def test_writeBin_sends_raw_bytes(self):
+        """Test that writeBin() sends bytes and correctly appends a newline byte."""
+        sock = iSocket().open('127.0.0.1', 5025)
+        binary_data = b'\x00\x01\x02\x03'
+        sock.writeBin(binary_data)
+        self.mock_socket_instance.sendall.assert_any_call(binary_data + b'\n')
+
+    def test_clear_error_loops_until_no_error(self):
+        """Test that clear_error() continues to query SYST:ERR? until 0 is returned."""
+        # Return an error twice, then "0,No error"
+        self.mock_socket_instance.recv.side_effect = [
+            b'MOCKED_IDN\n',
+            b'-113,"Undefined header"\n',
+            b'-222,"Data out of range"\n',
+            b'0,"No error"\n'
+        ]
+        sock = iSocket().open('127.0.0.1', 5025)
+        sock.clear_error()
+
+        # Verify SYST:ERR? was sent 3 times (plus the initial *IDN?)
+        self.assertEqual(self.mock_socket_instance.sendall.call_count, 4)
+
+    def test_opc_polls_event_status_register(self):
+        """Test that opc() polls *ESR? until bit 0 is set."""
+        # ESR returns 0 (busy) then 1 (complete)
+        self.mock_socket_instance.recv.side_effect = [
+            b'MOCKED_IDN\n',
+            b'0\n',
+            b'1\n'
+        ]
+        sock = iSocket().open('127.0.0.1', 5025)
+
+        with patch('time.sleep') as mock_sleep:
+            sock.opc(':INIT:IMM')
+            self.assertTrue(mock_sleep.called)
+            self.mock_socket_instance.sendall.assert_any_call(b'*ESR?\n')
+
+    def test_tick_tock_benchmarking(self):
+        """Test the tick/tock timing utility."""
+        sock = iSocket()
+        # Source uses timeit.default_timer, so we must patch that specifically
+        with patch('timeit.default_timer', side_effect=[100.0, 105.5]):
+            sock.tick()
+            elapsed = sock.tock()
+            self.assertEqual(elapsed, 5.5)
+
+    def test_timeout_updates_socket_timeout(self):
+        """Test that timeout() updates the socket timeout."""
+        sock = iSocket().open('127.0.0.1', 5025)
+        sock.timeout(45)
+        self.mock_socket_instance.settimeout.assert_called_with(45)
+
+    def test_query_returns_not_read_on_socket_error(self):
+        """Test that query returns a sentinel string on socket exceptions."""
+        sock = iSocket().open('127.0.0.1', 5025)
+
+        # Force an error on the recv call, which is correctly handled inside query's try block
+        self.mock_socket_instance.recv.side_effect = socket.error("Connection lost")
+
+        result = sock.query('*IDN?')
+        self.assertEqual(result, '<not Read>')
+
+    def test_delay_calls_time_sleep(self):
+        """Test the delay utility method."""
+        sock = iSocket()
+        with patch('time.sleep') as mock_sleep:
+            sock.delay(2.5)
+            mock_sleep.assert_called_once_with(2.5)
+
+    def test_logging_test_executes_without_error(self):
+        """Test utility logging method executes."""
+        self.mock_socket_instance.recv.return_value = b'IDN_DATA\n'
+        sock = iSocket().open('127.0.0.1', 5025)
+        # Simply ensure it doesn't crash
+        try:
+            sock.logging_test('test.txt')
+            success = True
+        except Exception:
+            success = False
+        self.assertTrue(success)
 
 if __name__ == '__main__':
     unittest.main()

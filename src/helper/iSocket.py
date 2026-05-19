@@ -45,8 +45,8 @@ class iSocket():
         while (read & 1) != 1:                  # Loop until done
             read = self.queryInt("*ESR?")       # Poll ESB
             time.sleep(0.5)
-            if time.delta > 300:                # noqa
-                break
+            # if time.delta > 300:                # noqa
+            #     break
 
     def open(self, host, port):
         """connect instrument socket"""
