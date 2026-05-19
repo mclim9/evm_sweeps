@@ -24,11 +24,11 @@ def main() -> None:
         pwr_arry=list(range(-45, 15, 1)),
         lvl_arry=['MAN'],
         output_dir=Path('results'),
-        file_prefix='wifi_evm_sweep'
+        file_prefix='5GNR_FR1_evm_sweep'
     )
 
-    runner = SweepRunner(vsa, vsg, config)
-    runner.run()
+    # runner = SweepRunner(vsa, vsg, config)
+    # runner.run()
 
     # Run w/ native VSA driver
     vsa = VSA_K144_driver(bench.VSA_start())

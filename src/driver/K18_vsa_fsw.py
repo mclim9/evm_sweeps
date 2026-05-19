@@ -10,7 +10,7 @@ if SRC_DIR not in sys.path:
 from helper.utils import method_timer
 from helper.bench_config import BenchConfig
 from driver.base_vsa import VSADriver
-from tkinter import Tk, messagebox as tkMessageBox
+from tkinter import messagebox as tkMessageBox
 
 class VSA_driver(VSADriver):
     def __init__(self, VSA=None):
