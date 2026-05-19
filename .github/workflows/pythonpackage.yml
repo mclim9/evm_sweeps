@@ -10,7 +10,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      PYTHONPATH: src
+      PYTHONPATH: .
 
     strategy:
       matrix:
