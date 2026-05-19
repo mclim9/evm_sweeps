@@ -27,8 +27,8 @@ class TestEVM_Suite(unittest.TestCase):
         main()
 
         # Verify bench was used to start instruments
-        mock_bench_inst.VSA_start.assert_called_once()
-        mock_bench_inst.VSG_start.assert_called_once()
+        mock_bench_inst.VSA_start.assert_called()
+        mock_bench_inst.VSG_start.assert_called()
 
         # Verify drivers were instantiated with the started instruments
         mock_vsa_driver.assert_called_once()

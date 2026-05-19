@@ -4,7 +4,7 @@ import logging
 from helper.bench_config import BenchConfig
 from EVM_Sweep import SweepConfig, SweepRunner
 # from driver.wifi_vsa_fsw import VSA_driver
-from driver.K18_vsa_fsw import VSA_driver as VSA_K18_driver
+from driver.K18_vsa_fsw import VSA_driver
 # from driver.wifi_vsa_fsw import VSA_driver as VSA_K91_driver
 # from driver.wifi_vsg_pvt import VSG_driver
 from driver.NR5G_FR1_vsa_fsw import VSA_driver as VSA_K144_driver
@@ -15,7 +15,7 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     bench = BenchConfig()
-    vsa = VSA_K18_driver(bench.VSA_start())
+    vsa = VSA_driver(bench.VSA_start())
     vsg = VSG_driver(bench.VSG_start())
 
     config = SweepConfig(
