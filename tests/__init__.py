@@ -1,9 +1,7 @@
+import os
 import sys
-from pathlib import Path
 
-# Get the path to the adjacent directory
-adj_dir = Path(__file__).parent.parent / 'EVM_Sweeps'
-print(adj_dir)
-# sys.path.insert(0, str(adj_dir))        # Add it to sys.path
-sys.path.append(str(adj_dir))           # Add it to sys.path
-# sys.path.remove(str(adj_dir))         # Remove the path
+TEST_DIR = os.path.dirname(__file__)
+SRC_DIR = os.path.abspath(os.path.join(TEST_DIR, '..', 'src'))
+if SRC_DIR not in sys.path:
+    sys.path.insert(0, SRC_DIR)
