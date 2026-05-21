@@ -12,7 +12,7 @@ class VSADriver(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def vsa_get_ACLR(self) -> float:
+    def vsa_get_ACLR(self) -> Tuple[float, float]:
         raise NotImplementedError
 
     @abstractmethod
@@ -20,7 +20,7 @@ class VSADriver(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def vsa_get_evm(self) -> Tuple[float, float]:
+    def vsa_get_evm(self) -> float:
         raise NotImplementedError
 
     @abstractmethod
