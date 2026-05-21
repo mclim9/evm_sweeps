@@ -1,7 +1,7 @@
-import unittest
 from unittest.mock import MagicMock, patch
-import os
+import unittest
 import sys
+import os
 
 # Add src directory to path for imports
 TEST_DIR = os.path.dirname(__file__)

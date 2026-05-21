@@ -1,6 +1,6 @@
 # Utilities for EVM Sweep
-import timeit
 import numpy as np
+import timeit
 
 def get_Array_stats(in_arry):
     avg = np.mean(in_arry)                          # Calc average

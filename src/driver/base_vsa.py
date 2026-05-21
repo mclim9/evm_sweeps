@@ -1,13 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import Tuple
 
-
-class  VSADriver(ABC):
+class VSADriver(ABC):
     def __init__(self, VSA, VSG):
         self.VSA = VSA
         self.VSG = VSG
-
-# Common methods
 
 # VSA methods
     @abstractmethod

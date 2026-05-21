@@ -5,7 +5,7 @@ class VSGDriver(ABC):
         self.VSG = VSG
 
     @abstractmethod
-    def vsg_configure(self) -> None:
+    def vsg_configure(self):
         raise NotImplementedError
 
     def vsg_get_extra(self) -> str:

@@ -1,8 +1,8 @@
-import os
-from typing import Tuple
-from helper.utils import method_timer
 from helper.bench_config import BenchConfig
+from helper.utils import method_timer
 from driver.base_vsa import VSADriver
+from typing import Tuple
+import os
 
 class VSA_driver(VSADriver):
     def __init__(self, VSA=None):
