@@ -1,5 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib
+# Use non-interactive backend for reliability in different environments
+matplotlib.use('Agg')
 import tkinter as tk
 from tkinter import filedialog
 # from GUI_elements import select_list
@@ -11,6 +14,8 @@ class plotter():
         self.df = pd.DataFrame([])
         if filename == '':
             self.select_file()
+        else:
+            self.read_data()
         self.file_out = f'{self.file_in.split(".txt")[0]}'
         self.file_append = ''
 
@@ -33,32 +38,33 @@ class plotter():
         self.file_paths = filedialog.askopenfilenames(title="Select a file", filetypes=[("Text files", "*.txt")])
         for file in self.file_paths:
             self.file_in = file
+            self.file_out = f'{self.file_in.split(".txt")[0]}'
             self.read_data()
 
     def read_data(self):
         print(self.file_in)
-        self.hdr = pd.read_csv(self.file_in, nrows=headerRows, header=None)
-        df_now = pd.read_csv(self.file_in, header=0, skiprows=headerRows, sep=',')
-        df_now = df_now.assign(VSA=f'{self.hdr[1][0]}_{self.hdr[2][0]}')        # VSA+Serial
-        df_now = df_now.assign(VSG=f'{self.hdr[1][1]}_{self.hdr[2][1]}')        # VSG+Serial
-        df_now = df_now.assign(VSA=f'{self.hdr[1][0]}')                         # VSA Model only
-        df_now = df_now.assign(VSG=f'{self.hdr[1][1]}')                         # VSG Model only
+        self.hdr = pd.read_csv(self.file_in, nrows=headerRows, header=None, skipinitialspace=True)
+        df_now = pd.read_csv(self.file_in, header=0, skiprows=headerRows, sep=',', skipinitialspace=True)
+        df_now = df_now.assign(VSA=self.hdr[1][0])                              # VSA Model only
+        df_now = df_now.assign(VSG=self.hdr[1][1])                              # VSG Model only
         df_now = df_now.assign(wave=f'{self.hdr[0][2]}')                        # Waveform
-        df_now = df_now.replace(r'^\s*nan', -9999.99, regex=True)               # Replace NaN with -9999
+        df_now = df_now.fillna(-9999.99)                                        # Replace NaN with -9999
         df_now = self.convert_column_to_float(df_now, 'EVM[dB]')                # EVM[dB] to float
+        df_now = self.convert_column_to_float(df_now, 'Power[dBm]')             # Power[dBm] to float
+        df_now = self.convert_column_to_float(df_now, 'Freq')                   # Freq to float
         df_now = self.convert_column_to_float(df_now, 'ChPwr[dBm]')             # ChPwr[dBm] to float
         self.df = pd.concat([self.df, df_now], ignore_index=True)
         print(f'Cols: {list(self.df.columns)}')                                 # Col names
         # self.df.iloc[2, self.df.columns.get_loc['VSG']]                       # Get VSG in row 2
 
     def filter_data_bathtub_per_freq(self):
-        freq_array = self.df._series['Freq'].unique()
+        freq_array = self.df['Freq'].unique()
         for freq in freq_array:
-            bathTub = self.df[self.df['Freq'].isin([freq])]                     # filter data   | Up Lt
+            bathTub = self.df[self.df['Freq'] == freq]                          # filter data   | Up Lt
             # df = df[df['lvling'].str.contains('EVM')]                         # filter data   | Up Lt
             self.Cols = ['Freq', 'Leveling', 'VSG', 'VSA']                      # Split Traces  | Up Rt
-            self.Xval = ['Power [dBm]']                                         # X Values      | Dn Lt
-            self.Yval = ['EVM[dB]']                                             # Y Values      | Dn Rt
+            self.Xval = 'Power[dBm]'                                            # X Values      | Dn Lt
+            self.Yval = 'EVM[dB]'                                               # Y Values      | Dn Rt
             self.aggg = 'mean'                                                  # mean | sum
             self.table = pd.pivot_table(bathTub, values=self.Yval, index=self.Xval, columns=self.Cols, aggfunc=self.aggg)
             # print(f'Traces:{self.table.shape[1]} DataPts:{self.table.shape[0]}')
@@ -68,9 +74,9 @@ class plotter():
     def filter_data_bathtub(self):
         bathTub = self.df
         # df = df[df['lvling'].str.contains('EVM')]                               # filter data   | Up Lt
-        self.Cols = ['Freq', 'Leveling', 'VSG', 'VSA']                          # Split Traces  | Up Rt
-        self.Xval = ['Power[dBm]']                                             # X Values      | Dn Lt
-        self.Yval = ['EVM[dB]']                                                 # Y Values      | Dn Rt
+        self.Cols = ['Freq', 'Leveling', 'VSG', 'VSA']
+        self.Xval = 'Power[dBm]'
+        self.Yval = 'EVM[dB]'
         self.aggg = 'mean'                                                      # mean | sum
         self.table = pd.pivot_table(bathTub, values=self.Yval, index=self.Xval, columns=self.Cols, aggfunc=self.aggg)
         # print(f'Traces:{self.table.shape[1]} DataPts:{self.table.shape[0]}')
@@ -80,10 +86,10 @@ class plotter():
     def filter_data_freqResp(self):
         pwr_arry = [-10, 5, 10, 12]
         for setPwr in pwr_arry:
-            freqRespData = self.df[self.df['Power [dBm]'].isin([setPwr])]       # filter data   | Up Lt
-            self.Cols = ['Leveling', 'Power [dBm]', 'VSG', 'VSA']               # Split Traces  | Up Rt
-            self.Xval = ['Freq']                                                # X Values      | Dn Lt
-            self.Yval = ['EVM[dB]']                                             # Y Values      | Dn Rt
+            freqRespData = self.df[self.df['Power[dBm]'] == setPwr]             # filter data   | Up Lt
+            self.Cols = ['Leveling', 'Power[dBm]', 'VSG', 'VSA']                # Split Traces  | Up Rt
+            self.Xval = 'Freq'                                                  # X Values      | Dn Lt
+            self.Yval = 'EVM[dB]'                                               # Y Values      | Dn Rt
             self.aggg = 'mean'                                                  # mean | sum
             self.table = pd.pivot_table(freqRespData, values=self.Yval, index=self.Xval, columns=self.Cols, aggfunc=self.aggg)
             self.file_append = f'freqResp_{setPwr}'
