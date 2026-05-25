@@ -26,7 +26,7 @@ class TestNR5G_FR1_VSA_FSW(unittest.TestCase):
 
         # Instantiate the driver under test
         self.driver = VSA_driver()
-        
+
         # Note: vsa_set_frequency uses self.VSG which isn't defined in this class's __init__.
         # We provide a mock here to allow testing that method.
         self.mock_vsg = MagicMock()
@@ -45,7 +45,7 @@ class TestNR5G_FR1_VSA_FSW(unittest.TestCase):
         """Test vsa_configure sends the correct sequence of SCPI commands."""
         # vsa_configure is decorated with method_timer, returns (None, time)
         _, elapsed = self.driver.vsa_configure()
-        
+
         self.mock_vsa.query.assert_any_call('*RST;*OPC?')
         self.mock_vsa.query.assert_any_call(':INST:CRE:NEW NR5G, "5G NR"; *OPC?')
         self.mock_vsa.write.assert_any_call(':CONF:NR5G:LDIR UL')
@@ -83,7 +83,7 @@ class TestNR5G_FR1_VSA_FSW(unittest.TestCase):
         # vsa_sweep is called, which calls query('*OPC?')
         self.mock_vsa.query.return_value = "1"
         self.mock_vsa.queryFloat.return_value = -50.5
-        
+
         evm, _ = self.driver.vsa_get_evm()
         self.assertEqual(evm, -50.5)
 
@@ -92,7 +92,7 @@ class TestNR5G_FR1_VSA_FSW(unittest.TestCase):
         self.mock_vsa.query.return_value = "1"
         # Fail the first attempt, succeed on the second
         self.mock_vsa.queryFloat.side_effect = [Exception("Comm error"), -50.5]
-        
+
         evm, _ = self.driver.vsa_get_evm()
         self.assertEqual(evm, -50.5)
 
@@ -120,11 +120,16 @@ class TestNR5G_FR1_VSA_FSW(unittest.TestCase):
         self.driver.vsa_set_level(method='LEV')
         self.mock_vsa.query.assert_called_with(':SENS:ADJ:LEV;*OPC?')
 
+    def test_vsa_set_level_man(self):
+        """Test triggering manual level."""
+        self.driver.vsa_set_level(method='MAN')
+        self.mock_vsa.query.assert_called_with('INIT:IMM;*OPC?')
+
     def test_vsa_save_state(self):
         """Test saving state and opening the remote instrument folder."""
         self.mock_vsa.s.getpeername.return_value = ("192.168.1.50", 5025)
         self.driver.Wavename = "test_config"
-        
+
         with patch('driver.NR5G_FR1_vsa_fsw.os.system') as mock_sys:
             self.driver.vsa_save_state()
             self.mock_vsa.query.assert_any_call('*IDN?')
