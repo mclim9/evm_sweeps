@@ -27,8 +27,8 @@ def main() -> None:
         file_prefix='5GNR_FR1_evm_sweep'
     )
 
-    # runner = SweepRunner(vsa, vsg, config)
-    # runner.run()
+    runner = SweepRunner(vsa, vsg, config)
+    runner.run()
 
     # Run w/ native VSA driver
     vsa = VSA_K144_driver(bench.VSA_start())

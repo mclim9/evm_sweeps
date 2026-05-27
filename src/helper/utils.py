@@ -1,4 +1,4 @@
-# Utilities for EVM Sweep
+from bench_config import BenchConfig
 import numpy as np
 import timeit
 
@@ -21,33 +21,22 @@ def method_timer(method):
         return result, delta_time
     return wrapper
 
-def std_config(林):
-    林.VSG_Config()
-    林.VSA_Config()
-    林.VSx_freq(林.freq)
-    林.VSA_sweep()
-    林.VSG.clear_error()
-    林.VSA.clear_error()
-
-def std_meas(林):
-    林.VSA_get_info()
-    林.VSA_sweep()
-    林.VSA_level()
-    EVMM = 林.VSA_get_EVM()[0]
-    ACLR = 林.VSA_get_ACLR()[0]
-    chPw = 林.VSA_get_chPwr()
-    print(f'EVM:{EVMM:6.2f} CH_Pwr:{chPw:6.2f} ACLR:{ACLR}')
-
-@method_timer
-def test(inString):
-    sum(range(1000000))
-    print(f'{inString}')
+def vsa_measure(林):
+    林.vsa_configure()
+    林.vsa_set_frequency(6e9)
+    林.vsa_sweep()
+    林.vsa_set_level('MAN')
+    林.vsa_get_evm()
 
 
 if __name__ == '__main__':
-    from driver.wifi_vsa_fsw import VSA_driver
-    from driver.wifi_vsg_pvt import VSG_driver
-    from helper.bench_config import BenchConfigstd_insr_driver                    # standard to use
+    import sys
+    import os
 
-    meas = std_insr_driver()
-    std_config(meas)
+    src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    if src_path not in sys.path:
+        sys.path.insert(0, src_path)
+
+    from driver.K18_vsa_fsw import VSA_driver
+    林 = VSA_driver(BenchConfig().VSA_start())
+    vsa_measure(林)

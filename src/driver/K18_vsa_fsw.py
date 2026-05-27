@@ -1,5 +1,6 @@
-import os
+from tkinter import messagebox as tkMessageBox
 import sys
+import os
 
 # Add src directory to path for imports when running standalone
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -7,10 +8,9 @@ SRC_DIR = os.path.abspath(os.path.join(CURRENT_DIR, '..'))
 if SRC_DIR not in sys.path:
     sys.path.insert(0, SRC_DIR)
 
-from helper.utils import method_timer
 from helper.bench_config import BenchConfig
+from helper.utils import method_timer
 from driver.base_vsa import VSADriver
-from tkinter import messagebox as tkMessageBox
 
 class VSA_driver(VSADriver):
     def __init__(self, VSA=None):
@@ -33,6 +33,7 @@ class VSA_driver(VSADriver):
         # Additional Settings
         self.VSA.write(':CONF:EVM:UNIT DB')                     # EVM Unit to dB
         self.VSA.write(':TRIG:SEQ:SOUR IMM')                    # Trigger External
+        self.VSA.write(':CONF:EQ:STAT ON')                      # Enable EQ
         # self.VSA.write(':SENS:SWE:TIME 0.015')                # Capture Time
 
     @method_timer

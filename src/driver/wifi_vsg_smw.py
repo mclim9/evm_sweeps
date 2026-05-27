@@ -42,7 +42,7 @@ class VSG_driver(VSGDriver):
         os.system(f'start \\\\{SMW_IP}\\user')
 
     def vsg_set_frequency(self, freq: float) -> None:
-        self.VSG.write(f":SOUR1:FREQ:CW {freq}")              # SMW
+        self.VSG.write(f":SOUR1:FREQ:CW {freq}")            # SMW
 
     def vsg_set_power(self, pwr: float) -> None:
         self.VSG.write(f":SOUR1:POW:POW {pwr}")             # SMW

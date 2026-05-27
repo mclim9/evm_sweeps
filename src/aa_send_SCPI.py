@@ -1,9 +1,11 @@
 from helper.bench_config import bench
 
 if __name__ == '__main__':
-    sweep = bench()
-    sweep.VSA = bench().VSA_start('10.102.72.32')
-    print(sweep.VSA.query('*IDN?'))
-    asdf = sweep.VSA.query(':FETC:CC1:ISRC:FRAM:SUMM:ALL?')
-    sweep.VSA.write(':SENS:ADJ:LEV;*WAI')
-    pass
+    林 = bench()
+    林.VSA = bench().VSA_start('192.168.58.102')
+    print(林.VSA.query('*IDN?'))
+    林.VSA.write("CONF:REFS:CWF:FPAT '/home/instrument/test.wv'")
+    林.VSA.write(':CONF:EQ:STAT ON')
+    # 林.VSA.clear_error()
+    # asdf = sweep.VSA.query(':FETC:CC1:ISRC:FRAM:SUMM:ALL?')
+    # sweep.VSA.write(':SENS:ADJ:LEV;*WAI')
