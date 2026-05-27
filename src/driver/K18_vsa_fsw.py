@@ -33,7 +33,7 @@ class VSA_driver(VSADriver):
         # Additional Settings
         self.VSA.write(':CONF:EVM:UNIT DB')                     # EVM Unit to dB
         self.VSA.write(':TRIG:SEQ:SOUR IMM')                    # Trigger External
-        self.VSA.write(':CONF:EQ:STAT ON')                      # Enable EQ
+        self.VSA.write(':CONF:EQU:STAT ON')                      # Enable EQ
         # self.VSA.write(':SENS:SWE:TIME 0.015')                # Capture Time
 
     @method_timer

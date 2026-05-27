@@ -1,4 +1,7 @@
-from bench_config import BenchConfig
+try:
+    from helper.bench_config import BenchConfig     # When root (src/)
+except ImportError:
+    from bench_config import BenchConfig            # when running direct
 import numpy as np
 import timeit
 
@@ -31,12 +34,16 @@ def vsa_measure(林):
 
 if __name__ == '__main__':
     import sys
-    import os
+    from pathlib import Path
 
-    src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    if src_path not in sys.path:
-        sys.path.insert(0, src_path)
+    # More robust way to find the 'src' directory (one level up from this file)
+    src_path = Path(__file__).resolve().parent.parent
+    if str(src_path) not in sys.path:
+        sys.path.insert(0, str(src_path))
 
     from driver.K18_vsa_fsw import VSA_driver
-    林 = VSA_driver(BenchConfig().VSA_start())
+    
+    bench = BenchConfig()
+    # Ensure both VSA and VSG are passed if the driver requires them
+    林 = VSA_driver(bench.VSA_start(), bench.VSG_start())
     vsa_measure(林)
