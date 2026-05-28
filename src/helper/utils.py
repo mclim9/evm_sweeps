@@ -42,8 +42,8 @@ if __name__ == '__main__':
         sys.path.insert(0, str(src_path))
 
     from driver.K18_vsa_fsw import VSA_driver
-    
+
     bench = BenchConfig()
     # Ensure both VSA and VSG are passed if the driver requires them
-    林 = VSA_driver(bench.VSA_start(), bench.VSG_start())
+    林 = VSA_driver(bench.VSA_start())
     vsa_measure(林)

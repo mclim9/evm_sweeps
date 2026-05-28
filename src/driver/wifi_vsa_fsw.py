@@ -94,5 +94,5 @@ class VSA_driver(VSADriver):
         else:
             self.VSA.write(f':INP:ATT:AUTO ON')                         # AutoAttenuation
             pwr = self.vsa_get_ch_power()
-            self.VSA.write(f':FETC:POW:OUTP:CURR:RES {pwr - 2}')        # Manually set ref level
+            self.VSA.write(f':FETC:POW:OUTP:CURR:RES {pwr + 2}')        # Manually set ref level
         return 0.0

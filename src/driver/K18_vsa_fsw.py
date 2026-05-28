@@ -62,9 +62,15 @@ class VSA_driver(VSADriver):
     def vsa_get_evm(self):
         try:
             self.vsa_sweep()                                            # Take a sweep
+            self.VSA.query(':CONF:EQU:TRA;*OPC?')                       # Update Equalizer
+            self.VSA.write(':CONF:EQU:STAT ON')                         # Enable EQ
+            self.vsa_sweep()                                            # Take a sweep
             EVM = self.VSA.queryFloat(':FETC:MACC:REVM:CURR:RES?')      # VSA CW
         except:                                                         # noqa
             print('EVM 2nd Try')
+            self.vsa_sweep()                                            # Take a sweep
+            self.VSA.query(':CONF:EQU:TRA;*OPC?')                       # Update Equalizer
+            self.VSA.write(':CONF:EQU:STAT ON')                         # Enable EQ
             self.vsa_sweep()                                            # Take a sweep
             EVM = self.VSA.queryFloat(':FETC:MACC:REVM:CURR:RES?')      # VSA CW
         return EVM
@@ -76,7 +82,7 @@ class VSA_driver(VSADriver):
             self.VSA.write(':SENS:ADJ:NCAN:AVER:COUN 10')               # IQNC Averaging
         elif extra == 'XCORR':
             self.VSA.query(':SENS:IQ:XCOR:STAT ON; *OPC?')              # XCorr On
-        extra = f'K18 EVM {extra}'
+        extra = f'K18 EVM'
         return extra
 
     def vsa_get_waveform_info(self) -> str:

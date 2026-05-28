@@ -24,7 +24,7 @@ def main() -> None:
         pwr_arry=list(range(-45, 15, 1)),
         lvl_arry=['MAN'],
         output_dir=Path('results'),
-        file_prefix='5GNR_FR1_evm_sweep'
+        file_prefix='5GNR_FR1_evm'
     )
 
     runner = SweepRunner(vsa, vsg, config)

@@ -117,7 +117,7 @@ class VSA_driver(VSADriver):
             self.VSA.write(':SENS:ADJ:NCAN:AVER:COUN 10')                   # IQNC Averaging
         elif extra == 'XCORR':
             self.VSA.query(':SENS:IQ:XCOR:STAT ON; *OPC?')                  # XCorr On
-        extra = f'5GNR EVM {extra}'
+        extra = f'5GNR EVM'
         return extra
 
     def vsa_get_waveform_info(self) -> str:
