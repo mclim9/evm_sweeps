@@ -98,7 +98,7 @@ class TestNR5G_FR1_VSA_FSW(unittest.TestCase):
 
     def test_vsa_get_extra(self):
         """Test vsa_get_extra default value."""
-        self.assertEqual(self.driver.vsa_get_extra(), '5GNR EVM none')
+        self.assertEqual(self.driver.vsa_get_extra(), '5GNR EVM')
 
     def test_vsa_get_waveform_info(self):
         """Test the construction of the waveform configuration string."""

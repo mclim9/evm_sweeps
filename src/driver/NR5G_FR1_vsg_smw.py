@@ -1,4 +1,4 @@
-from helper.utils import method_timer, std_meas, std_config
+from helper.utils import method_timer
 from helper.bench_config import BenchConfig
 from driver.base_vsg import VSGDriver
 import os
@@ -72,6 +72,4 @@ class VSG_driver(VSGDriver):
 
 
 if __name__ == '__main__':
-    std_config(VSG_driver())
-    std_meas(VSG_driver())
-    instr = VSG_driver()
+    pass

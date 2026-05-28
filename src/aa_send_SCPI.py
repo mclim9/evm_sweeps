@@ -10,4 +10,3 @@ if __name__ == '__main__':
     # 林.VSA.clear_error()
     # asdf = sweep.VSA.query(':FETC:CC1:ISRC:FRAM:SUMM:ALL?')
     # sweep.VSA.write(':SENS:ADJ:LEV;*WAI')
-        

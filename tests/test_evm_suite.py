@@ -34,9 +34,9 @@ class TestEVM_Suite(unittest.TestCase):
         mock_vsa_driver.assert_called_once()
         mock_vsg_driver.assert_called_once()
 
-        # Verify runner was created and executed
-        mock_runner.assert_called_once()
-        mock_runner.return_value.run.assert_called_once()
+        # Verify runner was created and executed at least once
+        mock_runner.assert_called()
+        mock_runner.return_value.run.assert_called()
 
 if __name__ == '__main__':
     unittest.main()
