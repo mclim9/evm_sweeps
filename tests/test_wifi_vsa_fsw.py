@@ -114,5 +114,11 @@ class TestWiFiVSAFSW(unittest.TestCase):
         extra = self.driver.vsa_get_extra()
         self.assertIsInstance(extra, str)
 
+    # def test_vsa_load(self):
+    #     """Test loading a state file onto the VSA."""
+    #     filename = "C:\\R_S\\Instr\\user\\wifi_setup.dfl"
+    #     self.driver.vsa_load(filename)
+    #     self.mock_vsa.write.assert_called_with(f"MMEM:LOAD:STAT 1, '{filename}'")
+
 if __name__ == '__main__':
     unittest.main()

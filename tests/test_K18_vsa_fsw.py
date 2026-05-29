@@ -127,6 +127,12 @@ class TestK18VSAFSW(unittest.TestCase):
         # self.mock_vsa.write.assert_called_with(':INP:ATT:AUTO ON')
         self.mock_vsa.query.assert_any_call('INIT:IMM;*OPC?')
 
+    def test_vsa_load(self):
+        """Test loading a state file onto the VSA."""
+        filename = "C:\\R_S\\Instr\\user\\K18_setup.dfl"
+        self.driver.vsa_load(filename)
+        self.mock_vsa.write.assert_called_with(f':MMEM:LOAD:DEM:C1 "{filename}"')
+
     def test_vsa_save_state(self):
         """Test saving state and opening the remote instrument folder."""
         self.mock_vsa.s.getpeername.return_value = ("10.0.0.1", 5025)

@@ -112,6 +112,12 @@ class TestNR5G_FR1_VSA_FSW(unittest.TestCase):
         self.assertIn("UL", info)
         self.assertEqual(self.driver.Wavename, info)
 
+    def test_vsa_load(self):
+        """Test loading a state file onto the VSA."""
+        filename = "C:\\R_S\\Instr\\user\\5GNR_setup.dfl"
+        self.driver.vsa_load(filename)
+        self.mock_vsa.write.assert_called_with(f':MMEM:LOAD:DEM:C1 "{filename}"')
+
     def test_vsa_set_frequency(self):
         """Test frequency update on both VSA and VSG."""
         self.driver.vsa_set_frequency(3.5e9)
