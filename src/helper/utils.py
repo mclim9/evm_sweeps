@@ -1,9 +1,6 @@
-try:
-    from helper.bench_config import BenchConfig     # When root (src/)
-except ImportError:
-    from bench_config import BenchConfig            # when running direct
 import numpy as np
 import timeit
+from helper.bench_config import BenchConfig         # When root (src/)
 
 def get_Array_stats(in_arry):
     avg = np.mean(in_arry)                          # Calc average
@@ -24,7 +21,7 @@ def method_timer(method):
         return result, delta_time
     return wrapper
 
-def vsa_measure(林):
+def vsa_meas_EVM(林):
     林.vsa_configure()
     林.vsa_set_frequency(6e9)
     林.vsa_sweep()
@@ -33,17 +30,9 @@ def vsa_measure(林):
 
 
 if __name__ == '__main__':
-    import sys
-    from pathlib import Path
-
-    # More robust way to find the 'src' directory (one level up from this file)
-    src_path = Path(__file__).resolve().parent.parent
-    if str(src_path) not in sys.path:
-        sys.path.insert(0, str(src_path))
-
     from driver.K18_vsa_fsw import VSA_driver
 
     bench = BenchConfig()
     # Ensure both VSA and VSG are passed if the driver requires them
     林 = VSA_driver(bench.VSA_start())
-    vsa_measure(林)
+    vsa_meas_EVM(林)
