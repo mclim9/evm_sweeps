@@ -38,6 +38,7 @@ class VSA_driver(VSADriver):
 
     @method_timer
     def vsa_get_ACLR(self):
+        self.vsa_sweep()
         chPwr = self.VSA.query(':FETC:POW:OUTP:CURR:RES?')              # Channel Power
         ACLRV = 'none'
         print(f'{chPwr} {ACLRV}')

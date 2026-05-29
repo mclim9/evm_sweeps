@@ -53,6 +53,17 @@ class TestK18VSAFSW(unittest.TestCase):
         self.mock_vsa.query.assert_any_call(':INST:CRE:NEW AMPL, "Amplifier"; *OPC?')
         self.assertIsInstance(elapsed, float)
 
+    def test_vsa_get_ACLR(self):
+        """Test retrieving ACLR data returns expected values."""
+        self.mock_vsa.query.side_effect = [
+            "",        # from vsa_sweep query (*OPC?)
+            "-15.5",   # chPwr
+            "-45.2"    # ACLRV
+        ]
+        (chPwr, ACLRV), _ = self.driver.vsa_get_ACLR()
+        self.assertEqual(chPwr, "-15.5")
+        self.assertEqual(ACLRV, 'none')
+
     def test_vsa_get_attn_ref(self):
         """Test retrieving attenuation and reference level."""
         self.mock_vsa.query.return_value = "20"
