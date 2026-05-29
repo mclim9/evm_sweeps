@@ -27,7 +27,7 @@ class TestEVM_Sweep_PLOT_Bathtub(unittest.TestCase):
         self.csv_data = pd.DataFrame({
             "Date": ["2023/10/27", "2023/10/27"],
             "Time": ["12:00:00", "12:00:01"],
-            "Freq": [1e9, 1e9],
+            "Freq": [1e9, 2e9],  # Use different frequencies for per_freq tests
             "Power[dBm]": [-10.0, -5.0],
             "RefLvl[dBm]": [5.0, 5.0],
             "Attn[dB]": [10, 10],
@@ -77,6 +77,42 @@ class TestEVM_Sweep_PLOT_Bathtub(unittest.TestCase):
         self.assertTrue(mock_savefig.called)
         filename_called = mock_savefig.call_args[0][0]
         self.assertIn("bathtub.png", filename_called)
+
+    @patch("EVM_Sweep_PLOT_Bathtub.pd.read_csv")
+    @patch("EVM_Sweep_PLOT_Bathtub.plt.savefig")
+    def test_filter_data_bathtub_per_freq(self, mock_savefig, mock_read_csv):
+        """Test the bathtub per frequency filtering and plotting."""
+        # Provide 4 items in side_effect in case the method re-reads data
+        mock_read_csv.side_effect = [
+            self.header_data, self.csv_data,
+            self.header_data, self.csv_data
+        ]
+        p = plotter(filename="results.txt")
+
+        p.filter_data_bathtub_per_freq()
+
+        # Verify that savefig was called, likely producing a per-frequency bathtub plot
+        self.assertTrue(mock_savefig.called)
+        filename_called = mock_savefig.call_args[0][0]
+        self.assertIn("results_bathtub_2.000GHz.png", filename_called)
+
+    @patch("EVM_Sweep_PLOT_Bathtub.pd.read_csv")
+    @patch("EVM_Sweep_PLOT_Bathtub.plt.savefig")
+    def test_filter_data_freqResp(self, mock_savefig, mock_read_csv):
+        """Test the frequency response filtering and plotting."""
+        # Provide 4 items in side_effect in case the method re-reads data
+        mock_read_csv.side_effect = [
+            self.header_data, self.csv_data,
+            self.header_data, self.csv_data
+        ]
+        p = plotter(filename="results.txt")
+
+        p.filter_data_freqResp()
+
+        # Verify that savefig was called for the frequency response plot
+        self.assertTrue(mock_savefig.called)
+        filename_called = mock_savefig.call_args[0][0]
+        self.assertIn("results_freqResp_12.png", filename_called)
 
     @patch("EVM_Sweep_PLOT_Bathtub.tk.Tk")
     @patch("EVM_Sweep_PLOT_Bathtub.filedialog.askopenfilenames")
