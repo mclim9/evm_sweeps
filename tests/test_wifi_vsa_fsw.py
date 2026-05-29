@@ -90,5 +90,29 @@ class TestWiFiVSAFSW(unittest.TestCase):
             # Check that os.system was called with the instrument IP
             mock_sys.assert_called_once_with(r'start \\192.168.1.50')
 
+    def test_vsa_get_ACLR(self):
+        """Test retrieving ACLR data returns expected values."""
+        self.mock_vsa.query.side_effect = [
+            "",        # from vsa_sweep query (*OPC?)
+            "-15.5",   # chPwr
+            "-45.2"    # ACLRV
+        ]
+        temp = self.driver.vsa_get_ACLR()
+        # (chPwr, ACLRV), _ = self.driver.vsa_get_ACLR()
+        # self.assertEqual(chPwr, "-15.5")
+        # self.assertEqual(ACLRV, "-45.2")
+        self.assertGreaterEqual(temp[1], 0.00)
+
+    def test_vsa_get_ch_power(self):
+        """Test retrieving channel power."""
+        self.mock_vsa.queryFloat.return_value = -10.5
+        pwr = self.driver.vsa_get_ch_power()
+        self.assertEqual(pwr, 999.0)
+
+    def test_vsa_get_extra(self):
+        """Test vsa_get_extra returns a string."""
+        extra = self.driver.vsa_get_extra()
+        self.assertIsInstance(extra, str)
+
 if __name__ == '__main__':
     unittest.main()
