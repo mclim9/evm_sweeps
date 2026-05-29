@@ -3,6 +3,7 @@ from unittest.mock import patch
 import os
 import sys
 import pandas as pd
+import warnings
 
 # Add project root and src to sys.path
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -17,6 +18,9 @@ class TestEVM_Sweep_PLOT_Bathtub(unittest.TestCase):
 
     def setUp(self):
         """Set up mock data for testing."""
+        # Suppress Matplotlib legend warnings during tests to keep logs clean
+        warnings.filterwarnings("ignore", category=UserWarning, message="No artists with labels found")
+
         # Mock header dataframe (3 rows)
         self.header_data = pd.DataFrame({
             0: ["VSA:", "VSG:", "Waveform_Info"],
@@ -92,7 +96,7 @@ class TestEVM_Sweep_PLOT_Bathtub(unittest.TestCase):
         p.filter_data_bathtub_per_freq()
 
         # Verify that savefig was called, likely producing a per-frequency bathtub plot
-        self.assertTrue(mock_savefig.called)
+        mock_savefig.assert_called()
         filename_called = mock_savefig.call_args[0][0]
         self.assertIn("results_bathtub_2.000GHz.png", filename_called)
 
@@ -110,7 +114,7 @@ class TestEVM_Sweep_PLOT_Bathtub(unittest.TestCase):
         p.filter_data_freqResp()
 
         # Verify that savefig was called for the frequency response plot
-        self.assertTrue(mock_savefig.called)
+        mock_savefig.assert_called()
         filename_called = mock_savefig.call_args[0][0]
         self.assertIn("results_freqResp_12.png", filename_called)
 
