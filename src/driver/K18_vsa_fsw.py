@@ -76,8 +76,7 @@ class VSA_driver(VSADriver):
             EVM = self.VSA.queryFloat(':FETC:MACC:REVM:CURR:RES?')      # VSA CW
         return EVM
 
-    def vsa_get_extra(self) -> str:
-        extra = 'none'  # 'XCORR' or 'IQNC'
+    def vsa_get_extra(self, extra='none') -> str:
         if extra == 'IQNC':
             self.VSA.query(':SENS:ADJ:NCAN:AVER:STAT ON; *OPC?')        # IQNC On
             self.VSA.write(':SENS:ADJ:NCAN:AVER:COUN 10')               # IQNC Averaging
