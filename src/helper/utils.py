@@ -1,6 +1,6 @@
+from helper.bench_config import BenchConfig         # When root (src/)
 import numpy as np
 import timeit
-from helper.bench_config import BenchConfig         # When root (src/)
 
 def get_Array_stats(in_arry):
     avg = np.mean(in_arry)                          # Calc average
