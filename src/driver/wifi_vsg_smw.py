@@ -26,7 +26,7 @@ class VSG_driver(VSGDriver):
         self.VSG.write("SOUR:GPRF:GEN1:ARB:FILE ''")
 
     def vsg_get_extra(self) -> str:
-        return "none"
+        return "SMW-WiFi"
 
     def vsg_save_state(self):
         self.VSG.query(f'*IDN?')

@@ -13,7 +13,7 @@ class VSG_driver(VSGDriver):
         # self.VSG.write("SOUR:GPRF:GEN1:ARB:FILE <ARBFile>")
 
     def vsg_get_extra(self) -> str:
-        return "none"
+        return "PVT-Arb"
 
     def vsg_save_state(self):
         pass

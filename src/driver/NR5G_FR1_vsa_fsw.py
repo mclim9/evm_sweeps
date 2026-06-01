@@ -51,8 +51,8 @@ class VSA_driver(VSADriver):
 
         # Additional Settings
         self.VSA.query(':LAY:ADD:WIND? "2",ABOV,EVSC')          # EVM vs Sym vs Carr
-        # self.VSA.write(':TRIG:SEQ:SOUR EXT')                    # Trigger External
-        self.VSA.write(':TRIG:SEQ:SOUR IMM')                    # Trigger External
+        self.VSA.write(':TRIG:SEQ:SOUR EXT')                    # Trigger External
+        # self.VSA.write(':TRIG:SEQ:SOUR IMM')                    # Trigger External
         self.VSA.write(':SENS:NR5G:FRAM:COUN:AUTO OFF')         # Frame count off
         self.VSA.write(':SENS:NR5G:FRAM:COUN 1')                # Single frame
         self.VSA.write(':SENS:NR5G:FRAM:SLOT 1')                # Single Slot

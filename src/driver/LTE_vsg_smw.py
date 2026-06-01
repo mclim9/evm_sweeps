@@ -31,7 +31,7 @@ class VSG_driver(VSGDriver):
         self.VSG.query('*OPC?')
 
     def vsg_get_extra(self) -> str:
-        return "none"
+        return "SMW-LTE"
 
     def vsg_save_state(self) -> None:
         """VSG Save State"""

@@ -68,7 +68,7 @@ class VSG_driver(VSGDriver):
         os.system(f'start \\\\{SMW_IP}\\user')
 
     def vsg_get_extra(self) -> str:
-        return 'none'
+        return 'SMW-5G-FR1'
 
 
 if __name__ == '__main__':
