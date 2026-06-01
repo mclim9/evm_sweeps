@@ -89,21 +89,27 @@ class TestK18VSAFSW(unittest.TestCase):
         self.mock_vsa.queryFloat.assert_called_with(':FETC:MACC:REVM:CURR:RES?')
         # self.assertEqual(evm, -40.5)
 
-    def test_vsa_get_evm_fail(self):
-        """Test EVM retrieval on a bad sweep."""
+    def test_vsa_get_evm_retry(self):
+        """Test that EVM retrieval retries once on failure."""
         self.mock_vsa.query.return_value = "1"
-        self.mock_vsa.queryFloat.return_value = -40.5
+        # Fail the first attempt, succeed on the second
+        self.mock_vsa.queryFloat.side_effect = [Exception("Comm error"), -50.5]
 
         evm, _ = self.driver.vsa_get_evm()
-        self.mock_vsa.write.assert_any_call('INIT:CONT OFF')
-        self.mock_vsa.queryFloat.assert_called_with(':FETC:MACC:REVM:CURR:RES?')
-        # self.assertEqual(evm, -40.5)
+        self.assertEqual(evm, -50.5)
 
     def test_vsa_get_extra(self):
         """Test vsa_get_extra default value."""
         extra = self.driver.vsa_get_extra()
         self.assertIsInstance(extra, str)
-        # self.assertEqual(extra, 'K18 EVM')
+        self.assertEqual(extra, 'K18 EVM')
+
+    def test_vsa_get_extra_query_failure(self):
+        """Test vsa_get_extra returns the default value when instrument query fails."""
+        # Mocking the case where an internal instrument query might return the error sentinel
+        self.mock_vsa.query.return_value = '<not Read>'
+        extra = self.driver.vsa_get_extra()
+        self.assertEqual(extra, 'K18 EVM')
 
     def test_vsa_get_waveform_info(self):
         """Test waveform info construction."""
