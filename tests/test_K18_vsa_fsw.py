@@ -111,6 +111,17 @@ class TestK18VSAFSW(unittest.TestCase):
         extra = self.driver.vsa_get_extra()
         self.assertEqual(extra, 'K18 EVM')
 
+    def test_vsa_get_extra_IQNC(self):
+        """Test vsa_get_extra returns a string with the expected value."""
+        extra = self.driver.vsa_get_extra('IQNC')
+        self.assertEqual(extra, 'K18 EVM IQNC')
+        pass
+
+    def test_vsa_get_extra_XCORR(self):
+        """Test vsa_get_extra returns a string with the expected value."""
+        extra = self.driver.vsa_get_extra('xcorr')
+        self.assertEqual(extra, 'K18 EVM XCORR')
+
     def test_vsa_get_waveform_info(self):
         """Test waveform info construction."""
         self.mock_vsa.query.return_value = "1234567"

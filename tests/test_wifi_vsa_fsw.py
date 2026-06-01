@@ -114,6 +114,17 @@ class TestWiFiVSAFSW(unittest.TestCase):
         extra = self.driver.vsa_get_extra()
         self.assertIsInstance(extra, str)
 
+    def test_vsa_get_extra_IQNC(self):
+        """Test vsa_get_extra returns a string with the expected value."""
+        extra = self.driver.vsa_get_extra('IQNC')
+        self.assertEqual(extra, 'WiFi EVM IQNC')
+        pass
+
+    def test_vsa_get_extra_XCORR(self):
+        """Test vsa_get_extra returns a string with the expected value."""
+        extra = self.driver.vsa_get_extra('xcorr')
+        self.assertEqual(extra, 'WiFi EVM XCORR')
+
     # def test_vsa_load(self):
     #     """Test loading a state file onto the VSA."""
     #     filename = "C:\\R_S\\Instr\\user\\wifi_setup.dfl"
