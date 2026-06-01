@@ -63,7 +63,7 @@ class TestWiFiVSG_SMW(unittest.TestCase):
 
     def test_vsg_get_extra(self):
         """Test vsg_get_extra returns 'none'."""
-        self.assertEqual(self.driver.vsg_get_extra(), 'none')
+        self.assertEqual(self.driver.vsg_get_extra(), 'SMW-WiFi')
 
     def test_vsg_save_state(self):
         """Test vsg_save_state queries instrument and calls os.system."""

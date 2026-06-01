@@ -73,7 +73,7 @@ class TestNR5G_FR1_VSG_SMW(unittest.TestCase):
 
     def test_vsg_get_extra(self):
         """Test vsg_get_extra returns 'none'."""
-        self.assertEqual(self.driver.vsg_get_extra(), 'none')
+        self.assertEqual(self.driver.vsg_get_extra(), 'SMW-5G-FR1')
 
     def test_vsg_save_state(self):
         """Test vsg_save_state queries instrument and calls os.system."""

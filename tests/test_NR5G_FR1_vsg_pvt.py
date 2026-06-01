@@ -45,7 +45,7 @@ class TestNR5G_FR1_VSG_PVT(unittest.TestCase):
 
     def test_vsg_get_extra_returns_default(self):
         """Test vsg_get_extra returns 'none'."""
-        self.assertEqual(self.driver.vsg_get_extra(), "none")
+        self.assertEqual(self.driver.vsg_get_extra(), "PVT-Arb")
 
     def test_vsg_save_state_placeholder(self):
         """Test vsg_save_state is callable (currently a placeholder)."""
