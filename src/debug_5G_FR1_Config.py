@@ -1,13 +1,8 @@
 from helper.bench_config import bench
-from driver.NR5G_FR1_vsa_fsw import VSA_driver
-from driver.NR5G_FR1_vsg_smw import VSG_driver
+from driver.NR5G_FR1_DL_vsa_fsw import VSA_driver
+from driver.NR5G_FR1_DL_vsg_smw import VSG_driver
 
-
-if __name__ == '__main__':
-    林 = bench()
-    # 林.VSA = bench().VSA_start('fsw43-101238')
-    林.VSA = bench().VSA_start('172.24.225.101')
-    print(林.VSA.query('*IDN?'))
+def NR5G_VSA_Config(林):
     錦 = VSA_driver(林.VSA)
     錦.freq = 7.4e9               # Center Frequency, Hz
     錦.scs  = 30                  # Sub Carr Spacing: 30; 60;
@@ -18,9 +13,7 @@ if __name__ == '__main__':
     錦.vsa_set_frequency(7.4e9)
     林.VSA.clear_error()
 
-    # 林.VSG = bench().VSG_start('smw200a-120297')
-    林.VSG = bench().VSG_start('172.24.225.131')
-    print(林.VSG.query('*IDN?'))
+def NR5G_VSG_Config(林):
     暉 = VSG_driver(林.VSG)
     暉.freq = 7.4e9               # Center Frequency, Hz
     暉.scs  = 30                  # Sub Carr Spacing: 30; 60;
@@ -31,9 +24,25 @@ if __name__ == '__main__':
     暉.vsg_configure()
     暉.vsg_set_frequency(7.4e9)
     林.VSG.clear_error()
+
+def save_files(林):
+    VSA_driver(林.VSA).vsa_save_state()
+    VSG_driver(林.VSG).vsg_save_state()
+
+if __name__ == '__main__':
+    林 = bench()
+    # 林.VSA = bench().VSA_start('fsw43-101238')
+    林.VSA = bench().VSA_start('172.24.225.101')
+    # 林.VSG = bench().VSG_start('smw200a-120297')
+    林.VSG = bench().VSG_start('172.24.225.131')
+    print(林.VSG.query('*IDN?'))
+    print(林.VSA.query('*IDN?'))
+
+    save_files(林)
+
 '''
 - Overview
-    - 400 MHz CC
+    - 400 MHz
     - 491.52 MHz sample rate
     - TX carrier Frequency = 7.4 GHz
     - Num tx ant = 1
@@ -41,15 +50,15 @@ if __name__ == '__main__':
     - 30 kHz SCS
     - 1024 QAM Table
 - DMRS
-    Type 1
+    Config Type 1
     TypeAPos=2
     2 DMRS symbols (add pos 1)
     Scr ID = 123 (N_SCID=0)
-    - 1 layer (DMRS Antenna port=0), DMRS and data multiplexed
+    1 layer (DMRS Antenna port=0), DMRS and data multiplexed
 - PDSCH
     start symbol = 1, length=13
     Mapping Type A
-    RA Type 1
+    RA Type 1 (sorry didn't understand this setting.)
     start RB=0
     num RB=1092
 - MCS24
