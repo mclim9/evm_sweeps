@@ -17,23 +17,24 @@ class VSA_driver(VSADriver):
         self.VSA = VSA or BenchConfig().VSA_start()
         self.VSA.s.settimeout(30)       # For AutoEVM
         self.base_path = "/home/instrument"
+        self.wv_file = "WLAN_802.11ax_160_mcs13_burst0.180ms_duty0.5.wv"
 
     @method_timer
     def vsa_configure(self) -> None:
         """VSA Config Before start of test suite"""
-        self.VSA.query('*RST;*OPC?')                            # Reset
-        self.VSA.query(':SYST:DISP:UPD ON; *OPC?')              # Display on
-        self.VSA.query(':INST:CRE:NEW AMPL, "Amplifier"; *OPC?') # Start Amplifier mode
-        wv_file = "WLAN_802.11ax_160_mcs13_burst0.180ms_duty0.5.wv"
-        self.VSA.write(f':CONF:REFS:CWF:FPAT "{self.base_path}/{wv_file}"')                    # Set Gen Func to CW
-        # self.VSA.write(':CONF:GEN:IPC:ADDR "192.168.8.20"')     # SMW IP
-        # self.VSA.query(':CONF:GEN:CONN:STAT ON;*OPC?')          # Wait to connect
+        self.VSA.query('*RST;*OPC?')                                        # Reset
+        self.VSA.query(':SYST:DISP:UPD ON; *OPC?')                          # Display on
+        self.VSA.query(':INST:CRE:NEW AMPL, "Amplifier"; *OPC?')            # Start Amplifier mode
+        self.VSA.write(f':CONF:REFS:CWF:FPAT "{self.base_path}/{self.wv_file}"') # Set Gen Func to CW
+        self.VSA.write(':CONF:REFS:CWF:WRITE;*WAI')                         # Write Gen Func to VSA
+        # self.VSA.write(':CONF:GEN:IPC:ADDR "192.168.8.20"')               # SMW IP
+        # self.VSA.query(':CONF:GEN:CONN:STAT ON;*OPC?')                    # Wait to connect
         # tkMessageBox.showinfo(title="FSWX KM118", message="Verify waveform loaded")
 
         # Additional Settings
         self.VSA.write(':CONF:EVM:UNIT DB')                     # EVM Unit to dB
         self.VSA.write(':TRIG:SEQ:SOUR IMM')                    # Trigger External
-        self.VSA.write(':CONF:EQU:STAT ON')                      # Enable EQ
+        self.VSA.write(':CONF:EQU:STAT ON')                     # Enable EQ
         # self.VSA.write(':SENS:SWE:TIME 0.015')                # Capture Time
 
     @method_timer
