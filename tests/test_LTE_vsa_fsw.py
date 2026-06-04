@@ -65,6 +65,13 @@ class TestLTEVSAFSW(unittest.TestCase):
         self.assertEqual(ACLRV, -45.0)
         self.mock_vsa.write.assert_any_call(':CONF:LTE:MEAS ACLR')
 
+    def test_vsa_get_attn_ref(self):
+        """Test retrieving attenuation and reference level."""
+        self.mock_vsa.query.side_effect = ["10", 5.0]
+        attn, refl = self.driver.vsa_get_attn_ref()
+        self.assertEqual(attn, "10")
+        self.assertEqual(refl, 5.0)
+
     def test_vsa_get_evm_retry_logic(self):
         """Test that EVM retrieval retries once on failure."""
         self.mock_vsa.query.return_value = "1" # For vsa_sweep
