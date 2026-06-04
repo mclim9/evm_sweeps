@@ -59,6 +59,10 @@ class TestNR5G_FR1_VSG_SMW(unittest.TestCase):
 
         self.assertIsInstance(elapsed, float)
 
+    def test_vsg_get_extra(self):
+        """Test vsg_get_extra returns 'none'."""
+        self.assertEqual(self.driver.vsg_get_extra(), 'SMW-5G-FR1')
+
     def test_vsg_set_frequency(self):
         """Test vsg_set_frequency sends the correct SCPI command."""
         test_freq = 3.5e9
@@ -71,11 +75,7 @@ class TestNR5G_FR1_VSG_SMW(unittest.TestCase):
         self.driver.vsg_set_power(test_pwr)
         self.mock_vsg.write.assert_called_with(f':SOUR1:POW:POW {test_pwr}')
 
-    def test_vsg_get_extra(self):
-        """Test vsg_get_extra returns 'none'."""
-        self.assertEqual(self.driver.vsg_get_extra(), 'SMW-5G-FR1')
-
-    def test_vsg_save_state(self):
+    def test_vsg_save_state_UL(self):
         """Test vsg_save_state queries instrument and calls os.system."""
         # Mock query responses for Wavename construction, matching execution flow
         self.mock_vsg.query.side_effect = [
@@ -83,7 +83,7 @@ class TestNR5G_FR1_VSG_SMW(unittest.TestCase):
             "FR1GT3",       # Band
             "UP",           # Dir
             "BW100",        # BW
-            "30",        # SCS (for UL)
+            "30",           # SCS (for UL)
             "QAM1024",      # Mod (for UL)
             "273",          # RBN (for UL)
             "OK"            # *OPC? for SETT:STOR
@@ -94,6 +94,29 @@ class TestNR5G_FR1_VSG_SMW(unittest.TestCase):
             self.driver.vsg_save_state()
 
             expected_wavename = 'FR1GT3_UL_30SCS_BW100_273RB_QAM1024'
+            self.assertEqual(self.driver.Wavename, expected_wavename)
+            self.mock_vsg.query.assert_any_call(f':SOUR1:BB:NR5G:SETT:STOR "/var/user/{expected_wavename}";*OPC?')
+            mock_sys.assert_called_once_with(r'start \\192.168.1.50\user')
+
+    def test_vsg_save_state_DL(self):
+        """Test vsg_save_state queries instrument and calls os.system."""
+        # Mock query responses for Wavename construction, matching execution flow
+        self.mock_vsg.query.side_effect = [
+            "IDN_RESPONSE", # *IDN?
+            "FR1GT3",       # Band
+            "DOWN",         # Dir
+            "BW100",        # BW
+            "30",           # SCS (for DL)
+            "QAM1024",      # Mod (for DL)
+            "273",          # RBN (for DL)
+            "OK"            # *OPC? for SETT:STOR
+        ]
+        self.mock_vsg.s.getpeername.return_value = ("192.168.1.50", 5025)
+
+        with patch('driver.NR5G_FR1_vsg_smw.os.system') as mock_sys:
+            self.driver.vsg_save_state()
+
+            expected_wavename = 'FR1GT3_DL_30SCS_BW100_273RB_QAM1024'
             self.assertEqual(self.driver.Wavename, expected_wavename)
             self.mock_vsg.query.assert_any_call(f':SOUR1:BB:NR5G:SETT:STOR "/var/user/{expected_wavename}";*OPC?')
             mock_sys.assert_called_once_with(r'start \\192.168.1.50\user')

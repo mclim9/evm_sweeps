@@ -115,7 +115,7 @@ class TestNR5G_FR1_VSA_FSW(unittest.TestCase):
         self.assertEqual(extra, '5GNR EVM XCORR')
         pass
 
-    def test_vsa_get_waveform_info(self):
+    def test_vsa_get_waveform_info_UL(self):
         """Test the construction of the waveform configuration string."""
         self.mock_vsa.query.side_effect = [
             "6000000000", "UL", "MIDD", "BW100", "SS30", "273", "Q1K", "OFF", "OFF", "0.015", "1"
@@ -124,6 +124,15 @@ class TestNR5G_FR1_VSA_FSW(unittest.TestCase):
         self.assertIn("6.0GHz", info)
         self.assertIn("UL", info)
         self.assertEqual(self.driver.Wavename, info)
+
+
+    def test_vsa_get_waveform_info_dl(self):
+        """Test the construction of the waveform configuration string for DL."""
+        self.mock_vsa.query.side_effect = [
+            "6000000000", "DL", "MIDD", "BW100", "SS30", "273", "Q1K", "0.015", "1", "1"
+        ]
+        info = self.driver.vsa_get_waveform_info()
+        self.assertIn("DL", info)
 
     def test_vsa_load(self):
         """Test loading a state file onto the VSA."""

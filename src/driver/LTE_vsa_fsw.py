@@ -50,7 +50,8 @@ class VSA_driver(VSADriver):
 
     def vsa_get_ch_power(self) -> float:
         """Get VSA Channel Power"""
-        return self.VSA.queryFloat(':FETC:CC1:SUMM:POW:AVER?')
+        chPwr = self.VSA.queryFloat(':FETC:CC1:SUMM:POW:AVER?')
+        return chPwr
 
     @method_timer
     def vsa_get_evm(self) -> float:
@@ -64,7 +65,7 @@ class VSA_driver(VSADriver):
         return evm
 
     def vsa_get_extra(self) -> str:
-        return 'none'
+        return 'FSW-LTE'
 
     def vsa_get_waveform_info(self) -> str:
         """Construct LTE configuration detail string."""

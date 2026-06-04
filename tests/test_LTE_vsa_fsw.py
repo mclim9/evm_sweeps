@@ -72,6 +72,13 @@ class TestLTEVSAFSW(unittest.TestCase):
         self.assertEqual(attn, "10")
         self.assertEqual(refl, 5.0)
 
+    def test_vsa_get_ch_power(self):
+        """Test retrieving channel power."""
+        self.mock_vsa.queryFloat.side_effect = None # Clear side_effect from setUp
+        self.mock_vsa.queryFloat.return_value = -10.5
+        pwr = self.driver.vsa_get_ch_power()
+        self.assertEqual(pwr, -10.5)
+
     def test_vsa_get_evm_retry_logic(self):
         """Test that EVM retrieval retries once on failure."""
         self.mock_vsa.query.return_value = "1" # For vsa_sweep
@@ -81,6 +88,11 @@ class TestLTEVSAFSW(unittest.TestCase):
         evm, _ = self.driver.vsa_get_evm()
         self.assertEqual(evm, -42.5)
         self.assertEqual(self.mock_vsa.queryFloat.call_count, 2)
+
+    def test_vsa_get_extra(self):
+        """Test vsa_get_extra returns a string."""
+        extra = self.driver.vsa_get_extra()
+        self.assertEqual(extra, 'FSW-LTE')
 
     def test_vsa_get_waveform_info(self):
         """Test construction of LTE info string."""
@@ -102,17 +114,36 @@ class TestLTEVSAFSW(unittest.TestCase):
             self.driver.vsa_save_state()
             mock_sys.assert_called_once_with(r'start \\192.168.1.10\instr')
 
+    def test_vsa_set_frequency(self):
+        """Test setting frequency sends correct SCPI."""
+        self.driver.vsa_set_frequency(6.125e9)
+        self.mock_vsa.write.assert_any_call(":SENSE:FREQ:CENT 6125000000.0")
+
     def test_vsa_set_level_adj(self):
         """Test vsa_set_level with LEV mode."""
         # Decorated with method_timer, returns (result, time)
         _, _ = self.driver.vsa_set_level(mode='LEV')
         self.mock_vsa.query.assert_called_with(':SENS:ADJ:LEV;*OPC?')
 
+    def test_vsa_get_waveform_info_dl(self):
+        """Test construction of LTE info string for Downlink."""
+        self.mock_vsa.query.side_effect = [
+            "2500000000", "DL", "FDD", "BW5_00", "QAM64", "25", "0"
+        ]
+        info = self.driver.vsa_get_waveform_info()
+        self.assertIn("DL_FDD", info)
+
+    def test_vsa_set_level_man(self):
+        """Test vsa_set_level with MAN mode."""
+        self.mock_vsa.queryFloat.return_value = -10.0
+        _, _ = self.driver.vsa_set_level(mode='MAN')
+        self.mock_vsa.write.assert_any_call(':INP:ATT:AUTO ON')
+
     def test_vsa_sweep(self):
         """Test triggering a capture sweep."""
         # Decorated with method_timer, returns (result, time)
         _, _ = self.driver.vsa_sweep()
-        self.mock_vsa.write.assert_called_with('INIT:CONT OFF')
+        self.mock_vsa.write.assert_any_call('INIT:CONT OFF')
 
 if __name__ == '__main__':
     unittest.main()

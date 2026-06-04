@@ -57,7 +57,7 @@ class VSG_driver(VSGDriver):
             bscs = self.VSG.query(':SOUR1:BB:NR5G:UBWP:USER0:CELL0:UL:BWP0:SCSP?')
             cmod = self.VSG.query(':SOUR1:BB:NR5G:SCH:CELL0:SUBF0:USER0:BWP0:ALL0:MOD?')
             bwrb = self.VSG.query(':SOUR1:BB:NR5G:SCH:CELL0:SUBF0:USER0:BWP0:ALL0:RBN?')
-            tpre = '???'
+            tpre = 'off'
             ldir  = 'UL'
         elif ldir == 'DOWN':
             bscs = self.VSG.query(':SOUR1:BB:NR5G:UBWP:USER0:CELL0:DL:BWP0:SCSP?')

@@ -62,6 +62,7 @@ class VSA_driver(VSADriver):
         # data = self.VSG.query(":SOUR1:BB:WLNN:FBL1:USER1:DATA:LENG?")
         # rtnStr = f"{freq}GHz_{std}_{bw}_{mcs}_{data}A-MPDU"
         rtnStr = "6.0GHz_11AC_160_MCS0_1234A-MPDU"
+        self.Wavename = rtnStr
         return rtnStr
 
     def vsa_save_state(self):

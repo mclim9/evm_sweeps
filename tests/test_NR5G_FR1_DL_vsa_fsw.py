@@ -141,6 +141,11 @@ class TestNR5G_FR1_VSA_FSW(unittest.TestCase):
         self.driver.vsa_set_level(method='LEV')
         self.mock_vsa.query.assert_called_with(':SENS:ADJ:LEV;*OPC?')
 
+    def test_vsa_set_level_evm(self):
+        """Test triggering manual level."""
+        self.driver.vsa_set_level(method='EVM')
+        self.mock_vsa.query.assert_any_call(':SENS:ADJ:EVM;*OPC?')
+
     def test_vsa_set_level_man(self):
         """Test triggering manual level."""
         self.driver.vsa_set_level(method='MAN')

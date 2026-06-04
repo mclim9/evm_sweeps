@@ -44,6 +44,13 @@ class TestISocket(unittest.TestCase):
         self.assertIsInstance(sock, iSocket) # Ensure it returns self
         self.assertEqual(sock.s, self.mock_socket_instance)
 
+    def test_open_handles_socket_error(self):
+        """Test that open() handles connection errors gracefully."""
+        self.mock_socket_instance.connect.side_effect = socket.error("Connection Refused")
+        sock = iSocket().open('192.168.1.1', 5025)
+        # Should survive the print and return self
+        self.assertIsInstance(sock, iSocket)
+
     def test_write_sends_command_with_newline(self):
         """Test that write() sends the command encoded with a newline."""
         sock = iSocket().open('127.0.0.1', 5025)
@@ -113,6 +120,18 @@ class TestISocket(unittest.TestCase):
         sock = iSocket().open('127.0.0.1', 5025)
         result = sock.read()
         self.assertEqual(result, b'RAW_DATA\n')
+
+    def test_read_returns_none_on_empty_packet(self):
+        """Test that read() returns None if the first packet is empty."""
+        self.mock_socket_instance.recv.return_value = b''
+        sock = iSocket().open('127.0.0.1', 5025)
+        self.assertIsNone(sock.read())
+
+    def test_read_handles_socket_error(self):
+        """Test that read() returns a sentinel on socket error."""
+        self.mock_socket_instance.recv.side_effect = socket.error("Timeout")
+        sock = iSocket().open('127.0.0.1', 5025)
+        self.assertEqual(sock.read(), '<not Read>')
 
     def test_writeBin_sends_raw_bytes(self):
         """Test that writeBin() sends bytes and correctly appends a newline byte."""

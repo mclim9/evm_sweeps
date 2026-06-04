@@ -75,7 +75,7 @@ class TestNR5G_FR1_VSG_SMW(unittest.TestCase):
         """Test vsg_get_extra returns 'none'."""
         self.assertEqual(self.driver.vsg_get_extra(), 'SMW-5G-DL-FR1')
 
-    def test_vsg_save_state(self):
+    def test_vsg_save_state_DL(self):
         """Test vsg_save_state queries instrument and calls os.system."""
         # Mock query responses for Wavename construction, matching execution flow
         self.mock_vsg.query.side_effect = [
@@ -96,6 +96,31 @@ class TestNR5G_FR1_VSG_SMW(unittest.TestCase):
             self.driver.vsg_save_state()
 
             expected_wavename = '4.0GHz_FR1GT3_DL_BW100_30_273_QAM1024_TPoff_PhaseCompOFF'
+            self.assertEqual(self.driver.Wavename, expected_wavename)
+            self.mock_vsg.query.assert_any_call(f':SOUR1:BB:NR5G:SETT:STOR "/var/user/{expected_wavename}";*OPC?')
+            mock_sys.assert_called_once_with(r'start \\192.168.1.50\user')
+
+    def test_vsg_save_state_UL(self):
+        """Test vsg_save_state queries instrument and calls os.system."""
+        # Mock query responses for Wavename construction, matching execution flow
+        self.mock_vsg.query.side_effect = [
+            "IDN_RESPONSE", # *IDN?
+            4000000000,     # Freq
+            "FR1GT3",       # Band
+            "UP",         # Dir
+            "BW100",        # BW
+            "OFF",          # Phase Comp
+            "30",           # SCS (for UL)
+            "QAM1024",      # Mod (for UL)
+            "273",          # RBN (for UL)
+            "OK"            # *OPC? for SETT:STOR
+        ]
+        self.mock_vsg.s.getpeername.return_value = ("192.168.1.50", 5025)
+
+        with patch('driver.NR5G_FR1_vsg_smw.os.system') as mock_sys:
+            self.driver.vsg_save_state()
+
+            expected_wavename = '4.0GHz_FR1GT3_UL_BW100_30_273_QAM1024_TPoff_PhaseCompOFF'
             self.assertEqual(self.driver.Wavename, expected_wavename)
             self.mock_vsg.query.assert_any_call(f':SOUR1:BB:NR5G:SETT:STOR "/var/user/{expected_wavename}";*OPC?')
             mock_sys.assert_called_once_with(r'start \\192.168.1.50\user')

@@ -36,12 +36,18 @@ class TestWiFiVSAFSW(unittest.TestCase):
         self.assertEqual(self.driver.VSA, self.mock_vsa)
         self.mock_vsa.s.settimeout.assert_called_once_with(30)
 
-    def test_vsa_configure_sends_commands(self):
-        """Test vsa_configure sends the correct SCPI sequence."""
-        self.driver.vsa_configure()
-        self.mock_vsa.query.assert_any_call("*RST;*OPC?")
-        self.mock_vsa.query.assert_any_call(':INST:CRE:NEW WLAN, "WLAN"; *OPC?')
-        self.mock_vsa.write.assert_any_call(":CONF:STAN 10")
+    def test_vsa_get_ACLR(self):
+        """Test retrieving ACLR data returns expected values."""
+        self.mock_vsa.query.side_effect = [
+            "",        # from vsa_sweep query (*OPC?)
+            "-15.5",   # chPwr
+            "-45.2"    # ACLRV
+        ]
+        temp = self.driver.vsa_get_ACLR()
+        # (chPwr, ACLRV), _ = self.driver.vsa_get_ACLR()
+        # self.assertEqual(chPwr, "-15.5")
+        # self.assertEqual(ACLRV, "-45.2")
+        self.assertGreaterEqual(temp[1], 0.00)
 
     def test_vsa_get_attn_ref(self):
         """Test retrieving attenuation and reference level."""
@@ -51,6 +57,19 @@ class TestWiFiVSAFSW(unittest.TestCase):
         attn, ref = self.driver.vsa_get_attn_ref()
         self.assertEqual(attn, "10")
         self.assertEqual(ref, 5.0)
+
+    def test_vsa_get_ch_power(self):
+        """Test retrieving channel power."""
+        self.mock_vsa.queryFloat.return_value = -10.5
+        pwr = self.driver.vsa_get_ch_power()
+        self.assertEqual(pwr, 999.0)
+
+    def test_vsa_configure_sends_commands(self):
+        """Test vsa_configure sends the correct SCPI sequence."""
+        self.driver.vsa_configure()
+        self.mock_vsa.query.assert_any_call("*RST;*OPC?")
+        self.mock_vsa.query.assert_any_call(':INST:CRE:NEW WLAN, "WLAN"; *OPC?')
+        self.mock_vsa.write.assert_any_call(":CONF:STAN 10")
 
     def test_vsa_get_evm_success(self):
         """Test EVM retrieval with valid data."""
@@ -67,48 +86,6 @@ class TestWiFiVSAFSW(unittest.TestCase):
         evm, _ = self.driver.vsa_get_evm()
         self.assertEqual(evm, 999.0)
 
-    def test_vsa_set_frequency(self):
-        """Test setting frequency sends correct SCPI."""
-        self.driver.vsa_set_frequency(6.125e9)
-        self.mock_vsa.write.assert_called_with(":SENSE:FREQ:CENT 6125000000.0")
-
-    def test_vsa_set_level_auto(self):
-        """Test vsa_set_level with auto mode."""
-        self.driver.vsa_set_level("LEV")
-        self.mock_vsa.query.assert_called_with(":CONF:POW:AUTO ONCE;*OPC?")
-
-    def test_vsa_save_state(self):
-        """Test save state queries instrument and calls os.system."""
-        self.mock_vsa.query.return_value = "TEST_VAL"
-        self.mock_vsa.queryInt.return_value = 160000000
-        self.mock_vsa.s.getpeername.return_value = ("192.168.1.50", 5025)
-
-        with patch('driver.wifi_vsa_fsw.os.system') as mock_sys:
-            self.driver.vsa_save_state()
-
-            self.mock_vsa.queryInt.assert_called_with(":TRAC:IQ:SRAT?")
-            # Check that os.system was called with the instrument IP
-            mock_sys.assert_called_once_with(r'start \\192.168.1.50')
-
-    def test_vsa_get_ACLR(self):
-        """Test retrieving ACLR data returns expected values."""
-        self.mock_vsa.query.side_effect = [
-            "",        # from vsa_sweep query (*OPC?)
-            "-15.5",   # chPwr
-            "-45.2"    # ACLRV
-        ]
-        temp = self.driver.vsa_get_ACLR()
-        # (chPwr, ACLRV), _ = self.driver.vsa_get_ACLR()
-        # self.assertEqual(chPwr, "-15.5")
-        # self.assertEqual(ACLRV, "-45.2")
-        self.assertGreaterEqual(temp[1], 0.00)
-
-    def test_vsa_get_ch_power(self):
-        """Test retrieving channel power."""
-        self.mock_vsa.queryFloat.return_value = -10.5
-        pwr = self.driver.vsa_get_ch_power()
-        self.assertEqual(pwr, 999.0)
-
     def test_vsa_get_extra(self):
         """Test vsa_get_extra returns a string."""
         extra = self.driver.vsa_get_extra()
@@ -124,6 +101,56 @@ class TestWiFiVSAFSW(unittest.TestCase):
         """Test vsa_get_extra returns a string with the expected value."""
         extra = self.driver.vsa_get_extra('xcorr')
         self.assertEqual(extra, 'WiFi EVM XCORR')
+
+    def test_vsa_get_waveform_info(self):
+        """Test construction of LTE info string."""
+        self.mock_vsa.query.side_effect = [
+            "6000000000", "11AC", "160", "MCS13", "1234"
+        ]
+        info = self.driver.vsa_get_waveform_info()
+        self.assertIn("6.0GHz", info)
+        self.assertIn("11AC", info)
+        self.assertEqual(self.driver.Wavename, info)
+
+    def test_vsa_set_frequency(self):
+        """Test setting frequency sends correct SCPI."""
+        self.driver.vsa_set_frequency(6.125e9)
+        self.mock_vsa.write.assert_any_call(":SENSE:FREQ:CENT 6125000000.0")
+
+    def test_vsa_set_level_auto(self):
+        """Test vsa_set_level with auto mode."""
+        self.driver.vsa_set_level("LEV")
+        self.mock_vsa.query.assert_any_call(":CONF:POW:AUTO ONCE;*OPC?")
+
+    def test_vsa_set_level_man(self):
+        """Test vsa_set_level with manual mode."""
+        self.driver.vsa_set_level("MAN")
+        self.mock_vsa.write.assert_any_call(':INP:ATT:AUTO ON')                         # AutoAttenuation
+
+    def test_vsa_save_state_mu(self):
+        """Test save state branch for MU direction."""
+        # Sequence: *IDN?, Freq, Standard, PacketType/Dir, MCS, RU, *OPC?
+        # Note: 802.11ax/be MU-PPDU implies Downlink
+        self.mock_vsa.query.side_effect = ["IDN", "6000000000", "PPDU", "MU", "MCS10", "RU242", "OK"]
+        self.mock_vsa.queryInt.return_value = 80000000
+        self.mock_vsa.s.getpeername.return_value = ("192.168.1.50", 5025)
+
+        with patch('driver.wifi_vsa_fsw.os.system'):
+            self.driver.vsa_save_state()
+            self.assertIn("MCS10", self.driver.Wavename)
+
+    def test_vsa_save_state(self):
+        """Test save state queries instrument and calls os.system."""
+        self.mock_vsa.query.return_value = "TEST_VAL"
+        self.mock_vsa.queryInt.return_value = 160000000
+        self.mock_vsa.s.getpeername.return_value = ("192.168.1.50", 5025)
+
+        with patch('driver.wifi_vsa_fsw.os.system') as mock_sys:
+            self.driver.vsa_save_state()
+
+            self.mock_vsa.queryInt.assert_called_with(":TRAC:IQ:SRAT?")
+            # Check that os.system was called with the instrument IP
+            mock_sys.assert_called_once_with(r'start \\192.168.1.50')
 
     # def test_vsa_load(self):
     #     """Test loading a state file onto the VSA."""

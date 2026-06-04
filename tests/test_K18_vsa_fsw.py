@@ -74,10 +74,10 @@ class TestK18VSAFSW(unittest.TestCase):
 
     def test_vsa_get_ch_power(self):
         """Test retrieving channel power."""
-        self.mock_vsa.queryFloat.return_value = 1.0
+        self.mock_vsa.queryFloat.side_effect = None # Clear side_effect from setUp
         self.mock_vsa.queryFloat.return_value = 0.5
         pwr = self.driver.vsa_get_ch_power()
-        # self.assertEqual(pwr, 0.5)
+        self.assertEqual(pwr, 0.5)
 
     def test_vsa_get_evm_success(self):
         """Test EVM retrieval on a successful sweep."""

@@ -45,6 +45,10 @@ class TestLTEVSGSMW(unittest.TestCase):
         self.mock_vsg.query.assert_any_call(':SOUR1:CORR:OPT:EVM 1;*OPC?')
         self.assertIsInstance(elapsed, float)
 
+    def test_vsg_get_extra(self):
+        """Test vsg_get_extra returns 'none'."""
+        self.assertEqual(self.driver.vsg_get_extra(), 'SMW-LTE')
+
     def test_vsg_set_frequency(self):
         """Test setting VSG CW frequency."""
         self.driver.vsg_set_frequency(2.1e9)
