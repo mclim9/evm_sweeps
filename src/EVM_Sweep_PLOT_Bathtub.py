@@ -106,7 +106,7 @@ class plotter():
 
         ax.grid(True)
         ax.set_title(f'{self.Yval} {self.file_append}')
-        ax.set_ylim([-55, -30])
+        ax.set_ylim([-60, -30])
         ax.set_xlabel(self.Xval)
         ax.set_ylabel(self.Yval)
 
