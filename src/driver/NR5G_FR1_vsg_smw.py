@@ -67,7 +67,7 @@ class VSG_driver(VSGDriver):
         SMW_IP = self.VSG.s.getpeername()[0]                            # Instr
         os.system(f'start \\\\{SMW_IP}\\user')
 
-    def vsg_get_extra(self) -> str:
+    def vsg_get_extra(self, extra=None) -> str:
         return 'SMW-5G-FR1'
 
 
