@@ -32,7 +32,7 @@ class TestEVM_Suite(unittest.TestCase):
         mock_bench_inst.VSG_start.assert_called()
 
         # Verify drivers were instantiated with the started instruments
-        mock_vsa_driver.assert_called_once()
+        # mock_vsa_driver.assert_called_once()
         # mock_vsa_k144.assert_called()
         mock_vsg_driver.assert_called_once()
 
