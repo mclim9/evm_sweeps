@@ -48,7 +48,9 @@ coverage.json
 ## R&S Files
 *.allocation
 *.nr5g
+src/aa*.py
 src/a_debug.py
 src/VISA_debug.py
 pyTools/utils/iSocket.py
 *_debug.py
+src/aa_send_SCPI.py
