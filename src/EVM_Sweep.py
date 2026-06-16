@@ -12,8 +12,10 @@ class SweepConfig:
     freq_arry: list[float]
     pwr_arry: list[int]
     lvl_arry: list[str]
-    output_dir: Path = Path("results")
+    output_dir: Path = Path("test_results")
     file_prefix: str = "evm_sweep"
+    vsa_extra: str | None = None
+    vsg_extra: str | None = None
 
     def output_path(self) -> Path:
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -66,8 +68,8 @@ class SweepRunner:
 
                     self.vsg.vsg_set_power(power)
                     level_time = self.vsa.vsa_set_level(mode)[1]
-                    vsa_extra = self.vsa.vsa_get_extra()
-                    vsg_extra = self.vsg.vsg_get_extra()
+                    vsa_extra = self.vsa.vsa_get_extra(self.config.vsa_extra)
+                    vsg_extra = self.vsg.vsg_get_extra(self.config.vsg_extra)
                     evm, evm_time = self.vsa.vsa_get_evm()
                     attn, ref_lvl = self.vsa.vsa_get_attn_ref()
                     ch_pwr = self.vsa.vsa_get_ch_power()
