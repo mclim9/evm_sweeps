@@ -62,7 +62,7 @@ class iSocket():
             print(f"SckErr: {socket.error}")
         return self
 
-    def query(self, SCPI):                          # noqa: E302
+    def query(self, SCPI, prtsc=False):                          # noqa: E302
         """Socket Query"""
         self.write(SCPI)
         # print(f'iSckt> {SCPI}  ', end='')
@@ -74,7 +74,8 @@ class iSocket():
         except socket.error:
             sOut = '<not Read>'
         # logging.info(f'Read < {sOut}')  # debug:MMM
-        # print(f'Read < {sOut}')
+        if prtsc:
+            print(f'iSckt> {SCPI}  Read < {sOut}')
         return sOut
 
     def queryFloat(self, SCPI):

@@ -50,3 +50,4 @@ coverage.json
 *.nr5g
 src/aa*
 src/aa_send_SCPI.py
+src/helper/bench_config.ini
