@@ -29,7 +29,7 @@ class VSA_driver(VSADriver):
         self.VSA.write(f':CONF:NR5G:UL:CC1:FRAM1:BWP0:RBC {self.rb}')   # BWP RB
         self.VSA.write(f':CONF:NR5G:UL:CC1:FRAM1:BWP0:RBOF {self.rbo}') # BWP RB Offset
         self.VSA.write(f':CONF:NR5G:UL:CC1:FRAM1:BWP0:SLOT0:ALL0:RBC {self.rb}')
-        self.VSA.write(f':CONF:NR5G:UL:CC1:FRAM1:BWP0:SLOT0:ALL0:RBOF {self.rbo}')
+        self.VSA.write(f':CONF:NR5G:UL:CC1:FRAM1:BWP0:SLOT0:ALL0:RBOF 0')
         self.VSA.write(':CONF:NR5G:UL:CC1:FRAM1:BWP0:SLOT0:ALL0:MOD Q1K')   # Q1k; QAM64; QAM256
 
         # Results Table Data Removal
@@ -70,10 +70,10 @@ class VSA_driver(VSADriver):
         """
         self.VSA.write(':CONF:NR5G:MEAS ACLR')
         self.vsa_sweep()
-        chPwr = self.VSA.query(':CALC:MARK:FUNC:POW:RES? CPOW')         # Channel Power
+        # chPwr = self.VSA.query(':CALC:MARK:FUNC:POW:RES? CPOW')         # Channel Power
         ACLRV = self.VSA.query(':CALC:MARK:FUNC:POW:RES? ACP')          # ACLR Relative
-        print(f'{chPwr} {ACLRV}')
-        return chPwr, ACLRV
+        print(f'{ACLRV}')
+        return ACLRV
 
     def vsa_get_attn_ref(self):
         """Get VSA input atten and ref level.
@@ -91,7 +91,11 @@ class VSA_driver(VSADriver):
         Returns:
             chPw(float): channel Power
         """
-        chPw = self.VSA.queryFloat(':FETC:CC1:ISRC:FRAM:SUMM:POW?')     # VSA CW Ch Pwr
+        mode = self.VSA.query(':CONF:NR5G:MEAS?')
+        if mode == 'EVM':
+            chPw = self.VSA.queryFloat(':FETC:CC1:ISRC:FRAM:SUMM:POW?') # VSA CW Ch Pwr
+        elif mode == 'ACLR':
+            chPw = self.VSA.queryFloat(':CALC:MARK:FUNC:POW:RES? CPOW') # Channel Power
         return chPw
 
     @method_timer
@@ -117,6 +121,10 @@ class VSA_driver(VSADriver):
             self.VSA.write(':SENS:ADJ:NCAN:AVER:COUN 10')                   # IQNC Averaging
         elif extra == 'XCORR':
             self.VSA.query(':SENS:IQ:XCOR:STAT ON; *OPC?')                  # XCorr On
+        elif extra == 'ACLR_RMS':
+            self.VSA.query(':SENS:WIND:DET1:FUNC RMS; *OPC?')               # RMS Detector
+        elif extra == 'XCorr_RMS':
+            self.VSA.query(':SENS:WIND:DET1:FUNC XRMS; *OPC?')              # RMS Detector
         extra = f'5GNR EVM {extra if extra else ""}'.strip()
         return extra
 
@@ -162,7 +170,7 @@ class VSA_driver(VSADriver):
             self.VSA.write(f':INP:ATT:AUTO ON')                         # AutoAttenuation
             self.vsa_sweep()                                            # Take a sweep to update channel
             pwr = self.vsa_get_ch_power()
-            self.VSA.write(f'INP:RLEV {pwr + 2}')                       # Manually set ref level
+            self.VSA.write(f'INP:RLEV {pwr + 4}')                       # Manually set ref level
         return 0.0
 
     def vsa_load(self, file):
