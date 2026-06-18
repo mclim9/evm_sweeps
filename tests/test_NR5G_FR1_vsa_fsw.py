@@ -72,7 +72,15 @@ class TestNR5G_FR1_VSA_FSW(unittest.TestCase):
         self.assertEqual(refl, 11.0)
         self.assertEqual(preamp, "12")
 
-    def test_vsa_get_ch_power(self):
+    def test_vsa_get_ch_power_ACLR(self):
+        """Test retrieving channel power from summary."""
+        self.mock_vsa.query.side_effect = ["ACLR", "-10.5"]
+
+        pwr = self.driver.vsa_get_ch_power()
+        self.assertEqual(pwr, -10.5)
+        self.mock_vsa.queryFloat.assert_called_with(':CALC:MARK:FUNC:POW:RES? CPOW')
+
+    def test_vsa_get_ch_power_EVM(self):
         """Test retrieving channel power from summary."""
         self.mock_vsa.query.side_effect = ["EVM", "-10.5"]
 
