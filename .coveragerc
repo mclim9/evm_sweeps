@@ -5,6 +5,7 @@ omit =
     */test_*.py
     */__init__.py
     */debug_*.py
+    aa_*.py
 
 [report]
 precision = 2
