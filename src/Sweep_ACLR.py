@@ -54,7 +54,7 @@ class SweepRunner:
         self.writer.write_line(f"VSG: {self.vsg.VSG.idn}")
         self.writer.write_line(self.vsa.vsa_get_waveform_info())
         self.writer.write_line(
-            "Date,Time,Freq,Power[dBm],RefLvl[dBm],Attn[dB],ChPwr[dBm],ACLR_adj-[dBc],ACLR_adj+[dBc],Leveling,AL-Time,ACLRT,TotalTime,VSA_extra,VSG_extra"
+            "Date,Time,Freq,Power[dBm],RefLvl[dBm],Attn[dB],Preamp[dB],ChPwr[dBm],ACLR_adj-[dBc],ACLR_adj+[dBc],Leveling,AL-Time,ACLRT,TotalTime,VSA_extra,VSG_extra"
         )
 
         total_steps = len(self.config.freq_arry) * len(self.config.pwr_arry) * len(self.config.lvl_arry)
@@ -74,13 +74,13 @@ class SweepRunner:
                     vsg_extra = self.vsg.vsg_get_extra(self.config.vsg_extra)
                     # evm, evm_time = self.vsa.vsa_get_evm()
                     aclr, aclr_time = self.vsa.vsa_get_ACLR()
-                    attn, ref_lvl = self.vsa.vsa_get_attn_ref()
+                    attn, ref_lvl, preamp = self.vsa.vsa_get_attn_ref()
                     # ch_pwr = aclr[0]
 
                     timestamp = datetime.datetime.now().strftime("%Y/%m/%d,%H:%M:%S")
                     total_time = level_time + aclr_time
                     row = (
-                        f"{timestamp},{freq},{power},{ref_lvl:.2f},{attn},{aclr},"
+                        f"{timestamp},{freq},{power},{ref_lvl:.2f},{attn},{preamp},{aclr},"
                         f"{mode},{level_time:.3f},{aclr_time:.3f},{total_time:.3f},"
                         f"{vsa_extra},{vsg_extra}"
                     )
