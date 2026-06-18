@@ -30,8 +30,10 @@ class SweepResultWriter:
         self.file = open(self.path, "a", encoding="utf-8")
 
     def write_line(self, line: str) -> None:
+        self.file = open(self.path, "a", encoding="utf-8")
         self.file.write(line + "\n")
         logging.info(line)
+        self.file.close()
 
     def close(self) -> None:
         self.file.close()
@@ -52,7 +54,7 @@ class SweepRunner:
         self.writer.write_line(f"VSG: {self.vsg.VSG.idn}")
         self.writer.write_line(self.vsa.vsa_get_waveform_info())
         self.writer.write_line(
-            "Date,Time,Freq,Power[dBm],RefLvl[dBm],Attn[dB],ChPwr[dBm],EVM[dB],Leveling,AL-Time,EVMT,TotalTime,VSA_extra,VSG_extra"
+            "Date,Time,Freq,Power[dBm],RefLvl[dBm],Attn[dB],Preamp,ChPwr[dBm],EVM[dB],Leveling,AL-Time,EVMT,TotalTime,VSA_extra,VSG_extra"
         )
 
         total_steps = len(self.config.freq_arry) * len(self.config.pwr_arry) * len(self.config.lvl_arry)
@@ -71,13 +73,14 @@ class SweepRunner:
                     vsa_extra = self.vsa.vsa_get_extra(self.config.vsa_extra)
                     vsg_extra = self.vsg.vsg_get_extra(self.config.vsg_extra)
                     evm, evm_time = self.vsa.vsa_get_evm()
-                    attn, ref_lvl = self.vsa.vsa_get_attn_ref()
+                    # aclr, aclr_time = self.vsa.vsa_get_aclr()
+                    attn, ref_lvl, preamp = self.vsa.vsa_get_attn_ref()
                     ch_pwr = self.vsa.vsa_get_ch_power()
 
                     timestamp = datetime.datetime.now().strftime("%Y/%m/%d,%H:%M:%S")
                     total_time = level_time + evm_time
                     row = (
-                        f"{timestamp},{freq},{power},{ref_lvl:.2f},{attn},{ch_pwr:.2f},"
+                        f"{timestamp},{freq},{power},{ref_lvl:.2f},{attn},{preamp},{ch_pwr:.2f},"
                         f"{evm:.2f},{mode},{level_time:.3f},{evm_time:.3f},{total_time:.3f},"
                         f"{vsa_extra},{vsg_extra}"
                     )

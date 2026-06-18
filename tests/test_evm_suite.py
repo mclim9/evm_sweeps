@@ -14,10 +14,9 @@ class TestEVM_Suite(unittest.TestCase):
 
     @patch('EVM_Suite.BenchConfig')
     @patch('EVM_Suite.VSA_driver')
-    @patch('EVM_Suite.VSA_K144_driver')
     @patch('EVM_Suite.VSG_driver')
     @patch('EVM_Suite.SweepRunner')
-    def test_main_initialization(self, mock_runner, mock_vsg_driver, mock_vsa_k144, mock_vsa_driver, mock_bench):
+    def test_main_initialization(self, mock_runner, mock_vsg_driver, mock_vsa_driver, mock_bench):
         """Verify that main() initializes drivers and starts the runner."""
 
         # Mock the bench starts

@@ -53,10 +53,10 @@ class TestWiFiVSAFSW(unittest.TestCase):
         """Test retrieving attenuation and reference level."""
         self.mock_vsa.query.return_value = "10"
         self.mock_vsa.queryFloat.return_value = 5.0
-
-        attn, ref = self.driver.vsa_get_attn_ref()
+        attn, refl, preamp = self.driver.vsa_get_attn_ref()
         self.assertEqual(attn, "10")
-        self.assertEqual(ref, 5.0)
+        self.assertEqual(refl, 5.0)
+        self.assertEqual(preamp, "10")
 
     def test_vsa_get_ch_power(self):
         """Test retrieving channel power."""

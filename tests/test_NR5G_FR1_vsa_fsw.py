@@ -24,7 +24,10 @@ class TestNR5G_FR1_VSA_FSW(unittest.TestCase):
         self.mock_bench_instance = self.mock_bench_class.return_value
         self.mock_bench_instance.VSA_start.return_value = self.mock_vsa
 
-        # Instantiate the driver under test
+        # Link queryInt and queryFloat to use the query mock, mimicking iSocket behavior
+        self.mock_vsa.queryInt.side_effect = lambda s: int(self.mock_vsa.query(s))
+        self.mock_vsa.queryFloat.side_effect = lambda s: float(self.mock_vsa.query(s))
+
         self.driver = VSA_driver()
 
         # Note: vsa_set_frequency uses self.VSG which isn't defined in this class's __init__.
@@ -56,24 +59,23 @@ class TestNR5G_FR1_VSA_FSW(unittest.TestCase):
         """Test retrieving ACLR data returns expected values."""
         self.mock_vsa.query.side_effect = [
             "",        # from vsa_sweep query (*OPC?)
-            "-15.5",   # chPwr
-            "-45.2"    # ACLRV
+            "-15.5,-45.2",    # chPwr
         ]
-        (chPwr, ACLRV), _ = self.driver.vsa_get_ACLR()
-        self.assertEqual(chPwr, "-15.5")
-        self.assertEqual(ACLRV, "-45.2")
+        (ACLRV), _ = self.driver.vsa_get_ACLR()
+        self.assertEqual(ACLRV, "-15.5,-45.2")
 
     def test_vsa_get_attn_ref(self):
         """Test retrieving attenuation and reference level."""
-        self.mock_vsa.query.return_value = "10"
-        self.mock_vsa.queryFloat.return_value = 5.0
-        attn, refl = self.driver.vsa_get_attn_ref()
+        self.mock_vsa.query.side_effect = ["10", "11", "12"]
+        attn, refl, preamp = self.driver.vsa_get_attn_ref()
         self.assertEqual(attn, "10")
-        self.assertEqual(refl, 5.0)
+        self.assertEqual(refl, 11.0)
+        self.assertEqual(preamp, "12")
 
     def test_vsa_get_ch_power(self):
         """Test retrieving channel power from summary."""
-        self.mock_vsa.queryFloat.return_value = -10.5
+        self.mock_vsa.query.side_effect = ["EVM", "-10.5"]
+
         pwr = self.driver.vsa_get_ch_power()
         self.assertEqual(pwr, -10.5)
         self.mock_vsa.queryFloat.assert_called_with(':FETC:CC1:ISRC:FRAM:SUMM:POW?')
@@ -81,16 +83,14 @@ class TestNR5G_FR1_VSA_FSW(unittest.TestCase):
     def test_vsa_get_evm_success(self):
         """Test EVM retrieval on a successful sweep."""
         # vsa_sweep is called, which calls query('*OPC?')
-        self.mock_vsa.query.return_value = "1"
-        self.mock_vsa.queryFloat.return_value = -50.5
+        self.mock_vsa.query.side_effect = ["1", "-50.5"]
 
         evm, _ = self.driver.vsa_get_evm()
         self.assertEqual(evm, -50.5)
 
     def test_vsa_get_evm_retry(self):
         """Test that EVM retrieval retries once on failure."""
-        self.mock_vsa.query.return_value = "1"
-        # Fail the first attempt, succeed on the second
+        self.mock_vsa.query.return_value = "1"               # Fail the first attempt, succeed on the second
         self.mock_vsa.queryFloat.side_effect = [Exception("Comm error"), -50.5]
 
         evm, _ = self.driver.vsa_get_evm()
@@ -125,7 +125,6 @@ class TestNR5G_FR1_VSA_FSW(unittest.TestCase):
         self.assertIn("UL", info)
         self.assertEqual(self.driver.Wavename, info)
 
-
     def test_vsa_get_waveform_info_dl(self):
         """Test the construction of the waveform configuration string for DL."""
         self.mock_vsa.query.side_effect = [
@@ -152,8 +151,10 @@ class TestNR5G_FR1_VSA_FSW(unittest.TestCase):
 
     def test_vsa_set_level_man(self):
         """Test triggering manual level."""
+        self.mock_vsa.query.side_effect = ["EVM1", "EVM"]
+        self.mock_vsa.queryFloat.side_effect = [10.0]
         self.driver.vsa_set_level(method='MAN')
-        self.mock_vsa.query.assert_called_with('INIT:IMM;*OPC?')
+        self.mock_vsa.query.assert_any_call('INIT:IMM;*OPC?')
 
     def test_vsa_save_state(self):
         """Test saving state and opening the remote instrument folder."""

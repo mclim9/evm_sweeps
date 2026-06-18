@@ -83,7 +83,8 @@ class VSA_driver(VSADriver):
         """
         attn = self.VSA.query('INP:ATT?')                               # Input Attn
         refl = self.VSA.queryFloat('DISP:TRAC:Y:SCAL:RLEV?')            # Ref Level
-        return attn, refl
+        prea = self.VSA.query('INP:GAIN:STAT?')                         # Preamp State
+        return attn, refl, prea
 
     def vsa_get_ch_power(self) -> float:
         """Get VSA channel power from result summary
@@ -123,8 +124,8 @@ class VSA_driver(VSADriver):
             self.VSA.query(':SENS:IQ:XCOR:STAT ON; *OPC?')                  # XCorr On
         elif extra == 'ACLR_RMS':
             self.VSA.query(':SENS:WIND:DET1:FUNC RMS; *OPC?')               # RMS Detector
-        elif extra == 'XCorr_RMS':
-            self.VSA.query(':SENS:WIND:DET1:FUNC XRMS; *OPC?')              # RMS Detector
+        elif extra == 'XCORR_RMS':
+            self.VSA.query(':SENS:WIND:DET1:FUNC XRMS; *OPC?')              # XCORR RMS Detector
         extra = f'5GNR EVM {extra if extra else ""}'.strip()
         return extra
 
@@ -162,6 +163,7 @@ class VSA_driver(VSADriver):
 
     @method_timer
     def vsa_set_level(self, method='LEV') -> float:
+        method = method.upper() if method else ''
         if 'EVM' in method:
             self.VSA.query(f':SENS:ADJ:EVM;*OPC?')                      # AutoEVM
         elif 'LEV' in method:

@@ -76,7 +76,8 @@ class VSA_driver(VSADriver):
         """
         attn = self.VSA.query('INP:ATT?')                               # Input Attn
         refl = self.VSA.queryFloat('DISP:TRAC:Y:SCAL:RLEV?')            # Ref Level
-        return attn, refl
+        prea = self.VSA.query('INP:GAIN:STAT?')                         # Preamp State
+        return attn, refl, prea
 
     def vsa_get_ch_power(self) -> float:
         """Get VSA channel power from result summary

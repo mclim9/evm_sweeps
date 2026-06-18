@@ -66,11 +66,12 @@ class TestK18VSAFSW(unittest.TestCase):
 
     def test_vsa_get_attn_ref(self):
         """Test retrieving attenuation and reference level."""
-        self.mock_vsa.query.return_value = "20"
-        self.mock_vsa.queryFloat.return_value = 10.0
-        attn, refl = self.driver.vsa_get_attn_ref()
-        self.assertEqual(attn, "20")
-        # self.assertEqual(refl, 10.0)
+        self.mock_vsa.query.side_effect = ["10", "11", "12"]
+        self.mock_vsa.queryFloat.return_value = 5.0
+        attn, refl, preamp = self.driver.vsa_get_attn_ref()
+        self.assertEqual(attn, "10")
+        self.assertEqual(refl, 11.0)
+        self.assertEqual(preamp, "12")
 
     def test_vsa_get_ch_power(self):
         """Test retrieving channel power."""

@@ -43,7 +43,7 @@ class TestEVM_Sweep(unittest.TestCase):
         mock_file().write.assert_called_with("test data\n")
 
         writer.close()
-        mock_file().close.assert_called_once()
+        mock_file().close.assert_called()
 
     @patch('EVM_Sweep.SweepResultWriter')
     def test_sweep_runner_execution_flow(self, mock_writer_class):
@@ -61,7 +61,7 @@ class TestEVM_Sweep(unittest.TestCase):
         # method_timer decorated functions return (result, time)
         mock_vsa.vsa_set_level.return_value = (0.0, 0.5)
         mock_vsa.vsa_get_evm.return_value = (-45.0, 1.2)
-        mock_vsa.vsa_get_attn_ref.return_value = ("10", 5.0)
+        mock_vsa.vsa_get_attn_ref.return_value = ("10", 5.0, 20)
         mock_vsa.vsa_get_ch_power.return_value = -10.2
         mock_vsa.vsa_get_extra.return_value = "none"
         mock_vsg.vsg_get_extra.return_value = "none"
@@ -102,7 +102,7 @@ class TestEVM_Sweep(unittest.TestCase):
         mock_vsa.vsa_get_waveform_info.return_value = "Waveform_Info"
         mock_vsa.vsa_set_level.return_value = (0.0, 0.1)
         mock_vsa.vsa_get_evm.return_value = (-40.0, 0.2)
-        mock_vsa.vsa_get_attn_ref.return_value = ("10", 5.0)
+        mock_vsa.vsa_get_attn_ref.return_value = ("10", 5.0, 30)
         mock_vsa.vsa_get_ch_power.return_value = -12.0
         mock_vsa.vsa_get_extra.return_value = 'none'
         mock_vsg.vsg_get_extra.return_value = 'none'

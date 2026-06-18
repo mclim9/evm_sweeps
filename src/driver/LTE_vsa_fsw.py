@@ -37,7 +37,8 @@ class VSA_driver(VSADriver):
         """Get VSA input atten and ref level."""
         attn = self.VSA.query('INP:ATT?')
         refl = self.VSA.queryFloat('DISP:TRAC:Y:SCAL:RLEV?')
-        return attn, refl
+        prea = self.VSA.query('INP:GAIN:STAT?')                         # Preamp State
+        return attn, refl, prea
 
     @method_timer
     def vsa_get_ACLR(self) -> Tuple[float, float]:

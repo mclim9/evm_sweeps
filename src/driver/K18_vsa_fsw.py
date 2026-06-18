@@ -54,7 +54,7 @@ class VSA_driver(VSADriver):
         attn = self.VSA.query('INP:ATT?')                               # Input Attn
         refl = self.VSA.queryFloat('INP:RLEV?')                         # Ref Level
         prea = self.VSA.query('INP:GAIN:STAT?')                         # Preamp Auto
-        return attn, refl
+        return attn, refl, prea
 
     def vsa_get_ch_power(self) -> float:
         chPw = self.VSA.queryFloat(':FETC:POW:OUTP:CURR:RES?')          # VSA CW Ch Pwr
