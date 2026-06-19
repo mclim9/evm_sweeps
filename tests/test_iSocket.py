@@ -69,6 +69,16 @@ class TestISocket(unittest.TestCase):
         self.mock_socket_instance.recv.assert_called() # Buffer size may vary
         self.assertEqual(response, 'QUERY_RESPONSE_123')
 
+    def test_query_sends_command_and_receives_comment(self):
+        """Test that query() sends a command and returns the decoded response."""
+        self.mock_socket_instance.recv.return_value = b'QUERY_RESPONSE_123\n'
+        sock = iSocket().open('127.0.0.1', 5025)
+        command = '*IDN?'
+        response = sock.query(command, True)
+
+        self.mock_socket_instance.recv.assert_called() # Buffer size may vary
+        self.assertEqual(response, 'QUERY_RESPONSE_123')
+
     def test_queryFloat_parses_float_response(self):
         """Test that queryFloat() correctly parses a float from the response."""
         self.mock_socket_instance.recv.return_value = b'123.45\n'
@@ -177,6 +187,14 @@ class TestISocket(unittest.TestCase):
         with patch('timeit.default_timer', side_effect=[100.0, 105.5]):
             sock.tick()
             elapsed = sock.tock()
+            self.assertEqual(elapsed, 5.5)
+
+    def test_tock_comment(self):
+        """Test the tock timing utility."""
+        sock = iSocket()
+        with patch('timeit.default_timer', side_effect=[100.0, 105.5]):
+            sock.tick()
+            elapsed = sock.tock('comment')
             self.assertEqual(elapsed, 5.5)
 
     def test_timeout_updates_socket_timeout(self):

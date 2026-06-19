@@ -21,7 +21,7 @@ class VSA_driver(VSADriver):
         self.VSA.write(":SENS:DEM:INT:WIEN:DSPR:STAT MANUAL")
         self.VSA.write(":SENS:DEM:INT:WIEN:DSPR 3.00")
 
-    def vsa_get_attn_ref(self) -> Tuple[str, float]:
+    def vsa_get_attn_ref(self) -> Tuple[str, float, str]:
         attn = self.VSA.query("INP:ATT?")
         refl = self.VSA.queryFloat("DISP:TRAC:Y:SCAL:RLEV?")
         prea = self.VSA.query('INP:GAIN:STAT?')                         # Preamp State
