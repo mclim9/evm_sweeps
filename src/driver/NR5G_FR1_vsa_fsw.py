@@ -167,12 +167,13 @@ class VSA_driver(VSADriver):
         if 'EVM' in method:
             self.VSA.query(f':SENS:ADJ:EVM;*OPC?')                      # AutoEVM
         elif 'LEV' in method:
-            self.VSA.query(f':SENS:ADJ:LEV;*OPC?')                      # Autolevel
+             self.VSA.query(f':SENS:ADJ:LEV;*OPC?')                      # Autolevel
         else:
             self.VSA.write(f':INP:ATT:AUTO ON')                         # AutoAttenuation
             self.vsa_sweep()                                            # Take a sweep to update channel
             pwr = self.vsa_get_ch_power()
-            self.VSA.write(f'INP:RLEV {pwr + 4}')                       # Manually set ref level
+            # self.VSA.write(f'INP:RLEV {pwr + 4}')                     # Manually set ref level
+            self.VSA.write(f'DISP:TRAC:Y:RLEV {pwr + 4}')               # Manually set ref level
         return 0.0
 
     def vsa_load(self, file):

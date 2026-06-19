@@ -54,8 +54,8 @@ class TestEVM_Sweep(unittest.TestCase):
         mock_writer = mock_writer_class.return_value
 
         # Mock instrument responses
-        mock_vsa.VSA.idn = "FSW-IDN"
-        mock_vsg.VSG.idn = "SMW-IDN"
+        mock_vsa.VSA.idn = "Rohde_Schwarz,VSA_IDN"
+        mock_vsg.VSG.idn = "Rohde_Schwarz,VSG_IDN"
         mock_vsa.vsa_get_waveform_info.return_value = "Waveform_Info_String"
 
         # method_timer decorated functions return (result, time)
@@ -74,7 +74,7 @@ class TestEVM_Sweep(unittest.TestCase):
         mock_vsg.vsg_configure.assert_called_once()
 
         # Verify Headers were written
-        mock_writer.write_line.assert_any_call("VSA: FSW-IDN")
+        mock_writer.write_line.assert_any_call("VSA: Rohde_Schwarz,VSA_IDN")
         mock_writer.write_line.assert_any_call("Waveform_Info_String")
 
         # Verify sweep logic (1 freq * 2 powers = 2 steps)
@@ -97,8 +97,8 @@ class TestEVM_Sweep(unittest.TestCase):
         mock_vsg = MagicMock()
 
         # Mock instrument attributes and responses used in loop formatting
-        mock_vsa.VSA.idn = "VSA_IDN"
-        mock_vsg.VSG.idn = "VSG_IDN"
+        mock_vsa.VSA.idn = "Rohde_Schwarz,VSA_IDN"
+        mock_vsg.VSG.idn = "Rohde_Schwarz,VSG_IDN"
         mock_vsa.vsa_get_waveform_info.return_value = "Waveform_Info"
         mock_vsa.vsa_set_level.return_value = (0.0, 0.1)
         mock_vsa.vsa_get_evm.return_value = (-40.0, 0.2)
