@@ -109,19 +109,26 @@ class TestNR5G_FR1_VSA_FSW(unittest.TestCase):
         extra = self.driver.vsa_get_extra()
         self.assertIsInstance(extra, str)
         self.assertEqual(extra, '5GNR EVM')
-        pass
 
     def test_vsa_get_extra_IQNC(self):
         """Test vsa_get_extra returns a string with the expected value."""
         extra = self.driver.vsa_get_extra('IQNC')
         self.assertEqual(extra, '5GNR EVM IQNC')
-        pass
 
     def test_vsa_get_extra_XCORR(self):
         """Test vsa_get_extra returns a string with the expected value."""
-        extra = self.driver.vsa_get_extra('xcorr')
+        extra = self.driver.vsa_get_extra('XCORR')
         self.assertEqual(extra, '5GNR EVM XCORR')
-        pass
+
+    def test_vsa_get_extra_ACLR_RMS(self):
+        """Test vsa_get_extra returns a string with the expected value."""
+        extra = self.driver.vsa_get_extra('ACLR_RMS')
+        self.assertEqual(extra, '5GNR EVM ACLR_RMS')
+
+    def test_vsa_get_extra_XCORR_RMS(self):
+        """Test vsa_get_extra returns a string with the expected value."""
+        extra = self.driver.vsa_get_extra('XCORR_RMS')
+        self.assertEqual(extra, '5GNR EVM XCORR_RMS')
 
     def test_vsa_get_waveform_info_UL(self):
         """Test the construction of the waveform configuration string."""
