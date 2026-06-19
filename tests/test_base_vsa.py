@@ -1,5 +1,5 @@
-import unittest
 from unittest.mock import MagicMock
+import unittest
 import sys
 import os
 

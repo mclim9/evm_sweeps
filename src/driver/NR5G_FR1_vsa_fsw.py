@@ -57,8 +57,8 @@ class VSA_driver(VSADriver):
         self.VSA.write(':SENS:NR5G:FRAM:COUN 1')                # Single frame
         self.VSA.write(':SENS:NR5G:FRAM:SLOT 1')                # Single Slot
         self.VSA.write(':UNIT:EVM DB')                          # EVM Units: DB PCT
-        # self.VSA.write(':SENS:SWE:TIME 0.0005')                 # Capture Time
-        self.VSA.write(':SENS:SWE:TIME 0.015')                 # Capture Time
+        self.VSA.write(':SENS:SWE:TIME 0.0005')                 # Capture Time
+        # self.VSA.write(':SENS:SWE:TIME 0.015')                  # Capture Time
         self.VSA.write(':CONF:NR5G:UL:CC1:RFUC:STAT OFF')       # Phase compensation
 
     @method_timer
