@@ -10,6 +10,7 @@ class VSG_driver(VSGDriver):
 
     @method_timer
     def vsg_configure(self) -> None:
+        self.VSG.write(":SOUR1:BB:WLNN:FBL1:STAN WBN")              # WBN; WBN; WAX
         self.VSG.write(":SOUR1:BB:WLNN:BW BW320")
         self.VSG.write(":SOUR1:BB:WLNN:FBL1:TMOD EHT320")
         self.VSG.write(":SOUR1:BB:WLNN:FBL1:USER1:MCS MCS13")
@@ -23,9 +24,8 @@ class VSG_driver(VSGDriver):
         self.VSG.write(":OUTP1:STAT 1")
         self.VSG.query(":SOUR1:CORR:OPT:EVM 1;*OPC?")
         self.VSG.write(":SOUR1:BB:WLNN:TRIG:OUTP1:MODE REST")
-        self.VSG.write("SOUR:GPRF:GEN1:ARB:FILE ''")
 
-    def vsg_get_extra(self) -> str:
+    def vsg_get_extra(self, extra=None) -> str:
         return "SMW-WiFi"
 
     def vsg_save_state(self):
@@ -42,7 +42,7 @@ class VSG_driver(VSGDriver):
         os.system(f'start \\\\{SMW_IP}\\user')
 
     def vsg_set_frequency(self, freq: float) -> None:
-        self.VSG.write(f":SOUR1:FREQ:CW {freq}")            # SMW
+        self.VSG.query(f":SOUR1:FREQ:CW {freq};*OPC?")            # SMW
 
     def vsg_set_power(self, pwr: float) -> None:
-        self.VSG.write(f":SOUR1:POW:POW {pwr}")             # SMW
+        self.VSG.query(f":SOUR1:POW:POW {pwr};*OPC?")       # SMW

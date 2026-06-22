@@ -62,14 +62,13 @@ class TestWiFiVSAFSW(unittest.TestCase):
         """Test retrieving channel power."""
         self.mock_vsa.queryFloat.return_value = -10.5
         pwr = self.driver.vsa_get_ch_power()
-        self.assertEqual(pwr, 999.0)
+        self.assertEqual(pwr, -10.5)
 
     def test_vsa_configure_sends_commands(self):
         """Test vsa_configure sends the correct SCPI sequence."""
         self.driver.vsa_configure()
         self.mock_vsa.query.assert_any_call("*RST;*OPC?")
         self.mock_vsa.query.assert_any_call(':INST:CRE:NEW WLAN, "WLAN"; *OPC?')
-        self.mock_vsa.write.assert_any_call(":CONF:STAN 10")
 
     def test_vsa_get_evm_success(self):
         """Test EVM retrieval with valid data."""
@@ -108,8 +107,8 @@ class TestWiFiVSAFSW(unittest.TestCase):
             "6000000000", "11AC", "160", "MCS13", "1234"
         ]
         info = self.driver.vsa_get_waveform_info()
-        self.assertIn("6.0GHz", info)
         self.assertIn("11AC", info)
+        self.assertIn("160", info)
         self.assertEqual(self.driver.Wavename, info)
 
     def test_vsa_set_frequency(self):

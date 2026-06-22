@@ -14,11 +14,12 @@ class VSA_driver(VSADriver):
         self.VSA.query(":SYST:DISP:UPD ON; *OPC?")
         self.VSA.query(':INST:CRE:NEW WLAN, "WLAN"; *OPC?')
         self.VSA.write(":INIT:CONT ON")
-        self.VSA.write(":CONF:STAN 10")                     # be:11 ax:10
-        self.VSA.write(":SENS:SWE:TIME 0.002")
+        self.VSA.write(":CONF:STAN 12")                     # bn:12 be:11 ax:10
+        self.VSA.write(":SENS:SWE:TIME 0.001")
         self.VSA.write(":SENS:DEM:TXAR OFF")
         self.VSA.write(":SENS:DEM:CEST 0")
         self.VSA.write(":SENS:DEM:INT:WIEN:DSPR:STAT MANUAL")
+        self.VSA.write(":CALC1:MARK1:X 0")
         self.VSA.write(":SENS:DEM:INT:WIEN:DSPR 3.00")
 
     def vsa_get_attn_ref(self) -> Tuple[str, float, str]:
@@ -29,15 +30,24 @@ class VSA_driver(VSADriver):
 
     @method_timer
     def vsa_get_ACLR(self):
+        self.VSA.write(':CONF:BURS:SPEC:ACLR:IMM')
+        self.vsa_sweep()
+        ACLRV = self.VSA.query(':CALC:MARK:FUNC:POW:RES? ACP')          # ACLR Relative
+        print(f'{ACLRV}')
+        return ACLRV
+
         pass
 
     def vsa_get_ch_power(self) -> float:
-        return 999.0
+        # chPw = self.VSA.queryFloat('FETC:BURS:PAYL?')
+        self.vsa_sweep()
+        self.vsa_sweep()
+        chPw = self.VSA.queryFloat(':CALC1:MARK:Y?')
+        return chPw
 
     @method_timer
     def vsa_get_evm(self):
-        self.VSA.write("INIT:CONT OFF")
-        self.VSA.query("INIT:IMM;*OPC?")
+        self.vsa_sweep()
         raw = self.VSA.query(":FETC:BURS:EVM:DATA:AVER?").split(",")
         try:
             evm = float(raw[0])
@@ -56,13 +66,12 @@ class VSA_driver(VSADriver):
         return extra
 
     def vsa_get_waveform_info(self) -> str:
-        # freq = int(self.VSG.query(":SOUR1:FREQ:CW?")) / 1e9
-        # std = self.VSG.query(":SOUR1:BB:WLNN:FBL1:TMOD?")
-        # bw = self.VSG.query(":SOUR1:BB:WLNN:BW?")
-        # mcs = self.VSG.query(":SOUR1:BB:WLNN:FBL1:USER1:MCS?")
-        # data = self.VSG.query(":SOUR1:BB:WLNN:FBL1:USER1:DATA:LENG?")
-        # rtnStr = f"{freq}GHz_{std}_{bw}_{mcs}_{data}A-MPDU"
-        rtnStr = "6.0GHz_11AC_160_MCS0_1234A-MPDU"
+        # freq = int(self.VSA.query(":SENS1:FREQ:CENT?")) / 1e9
+        std = self.VSA.query(":CONF:STAN?")
+        bw = self.VSA.query(":SENS:POW:ACH:CBW?")
+        mcs = self.VSA.query("CONF:WLAN:RUC:SEGM1:CHAN1:RUL1:USER1:MCS?")
+        rtnStr = f"WiFi_{std}_{bw}_MCS{mcs}"
+        # rtnStr = "6.0GHz_11AC_160_MCS0_1234A-MPDU"
         self.Wavename = rtnStr
         return rtnStr
 
@@ -96,5 +105,12 @@ class VSA_driver(VSADriver):
         else:
             self.VSA.write(f':INP:ATT:AUTO ON')                         # AutoAttenuation
             pwr = self.vsa_get_ch_power()
-            self.VSA.write(f':FETC:POW:OUTP:CURR:RES {pwr + 2}')        # Manually set ref level
+            self.VSA.write(f'DISP:TRAC:Y:SCAL:RLEV {pwr + 4}')          # FSW
+            # self.VSA.write(f':INP1:RLEV {pwr + 4}')                     # FSWX
         return 0.0
+
+    @method_timer
+    def vsa_sweep(self):
+        """VSA take a single sweep"""
+        self.VSA.write('INIT:CONT OFF')
+        self.VSA.query('INIT:IMM;*OPC?')

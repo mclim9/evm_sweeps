@@ -45,21 +45,20 @@ class TestWiFiVSG_SMW(unittest.TestCase):
         self.mock_vsg.write.assert_any_call(':SOUR1:BB:WLNN:STAT 1')
         self.mock_vsg.write.assert_any_call(':OUTP1:STAT 1')
         self.mock_vsg.query.assert_any_call(':SOUR1:CORR:OPT:EVM 1;*OPC?')
-        self.mock_vsg.write.assert_any_call("SOUR:GPRF:GEN1:ARB:FILE ''")
 
         self.assertIsInstance(elapsed, float)
 
     def test_vsg_set_frequency(self):
         """Test vsg_set_frequency sends the correct SCPI command."""
-        test_freq = 5.8e9
+        test_freq = 1234567.0
         self.driver.vsg_set_frequency(test_freq)
-        self.mock_vsg.write.assert_called_with(f':SOUR1:FREQ:CW {test_freq}')
+        self.mock_vsg.query.assert_called_with(f':SOUR1:FREQ:CW {test_freq};*OPC?')
 
     def test_vsg_set_power(self):
         """Test vsg_set_power sends the correct SCPI command."""
         test_pwr = 10.0
         self.driver.vsg_set_power(test_pwr)
-        self.mock_vsg.write.assert_called_with(f':SOUR1:POW:POW {test_pwr}')
+        self.mock_vsg.query.assert_called_with(f':SOUR1:POW:POW {test_pwr};*OPC?')
 
     def test_vsg_get_extra(self):
         """Test vsg_get_extra returns 'none'."""
