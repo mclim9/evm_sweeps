@@ -54,8 +54,8 @@ class Test_Sweep_ACLR(unittest.TestCase):
         mock_writer = mock_writer_class.return_value
 
         # Mock instrument responses
-        mock_vsa.VSA.idn = "FSW-IDN"
-        mock_vsg.VSG.idn = "SMW-IDN"
+        mock_vsa.VSA.idn = "Rohde_Schwarz,VSA_IDN"
+        mock_vsg.VSG.idn = "Rohde_Schwarz,VSG_IDN"
         mock_vsa.vsa_get_waveform_info.return_value = "Waveform_Info_String"
 
         # method_timer decorated functions return (result, time)
@@ -97,8 +97,8 @@ class Test_Sweep_ACLR(unittest.TestCase):
         mock_vsg = MagicMock()
 
         # Mock instrument attributes and responses used in loop formatting
-        mock_vsa.VSA.idn = "VSA_IDN"
-        mock_vsg.VSG.idn = "VSG_IDN"
+        mock_vsa.VSA.idn = "Rohde_Schwarz,VSA_IDN"
+        mock_vsg.VSG.idn = "Rohde_Schwarz,VSG_IDN"
         mock_vsa.vsa_get_waveform_info.return_value = "Waveform_Info"
         mock_vsa.vsa_set_level.return_value = (0.0, 0.1)
         mock_vsa.vsa_get_ACLR.return_value = ('123, 234, 345', 0.1)
