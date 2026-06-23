@@ -49,12 +49,14 @@ class SweepRunner:
     def run(self) -> None:
         self.vsa.vsa_configure()
         self.vsg.vsg_configure()
+        self.vsa.name = self.vsa.VSA.idn.split(",")[1].strip()
+        self.vsg.name = self.vsg.VSG.idn.split(",")[1].strip()
 
         self.writer.write_line(f"VSA: {self.vsa.VSA.idn}")
         self.writer.write_line(f"VSG: {self.vsg.VSG.idn}")
         self.writer.write_line(self.vsa.vsa_get_waveform_info())
         self.writer.write_line(
-            "Date,Time,Freq,Power[dBm],RefLvl[dBm],Attn[dB],Preamp[dB],ChPwr[dBm],ACLR_adj-[dBc],ACLR_adj+[dBc],Leveling,AL-Time,ACLRT,TotalTime,VSA_extra,VSG_extra"
+            "Date,Time,Freq,Power[dBm],RefLvl[dBm],Attn[dB],Preamp[dB],ChPwr[dBm],ACLR_adj-[dBc],ACLR_adj+[dBc],Leveling,AL-Time,ACLRT,TotalTime,VSA_extra,VSG_extra,VSA_name,VSG_name"
         )
 
         total_steps = len(self.config.freq_arry) * len(self.config.pwr_arry) * len(self.config.lvl_arry)
@@ -82,7 +84,7 @@ class SweepRunner:
                     row = (
                         f"{timestamp},{freq},{power},{ref_lvl:.2f},{attn},{preamp},{aclr},"
                         f"{mode},{level_time:.3f},{aclr_time:.3f},{total_time:.3f},"
-                        f"{vsa_extra},{vsg_extra}"
+                        f"{vsa_extra},{vsg_extra},{self.vsa.name},{self.vsg.name}"
                     )
                     self.writer.write_line(row)
 
