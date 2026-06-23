@@ -48,6 +48,6 @@ coverage.json
 ## R&S Files
 *.allocation
 *.nr5g
-src/aa*
+src/aa_*.py
 src/aa_send_SCPI.py
 src/helper/bench_config.ini
