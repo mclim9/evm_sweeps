@@ -53,9 +53,9 @@ def main():
 
     # Fields
     pivot_table.PivotFields("Power[dBm]").Orientation = 1   # xlRowField
+    pivot_table.PivotFields("VSA_name").Orientation = 2     # xlColumnField
     pivot_table.PivotFields("Leveling").Orientation = 2     # xlColumnField
     pivot_table.PivotFields("VSA_extra").Orientation = 2    # xlColumnField
-    pivot_table.PivotFields("VSG_extra").Orientation = 2    # xlColumnField
     pivot_table.PivotFields("Freq").Orientation = 2         # xlColumnField
 
     pivot_table.AddDataField(
