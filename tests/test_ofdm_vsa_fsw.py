@@ -104,6 +104,16 @@ class Test_OFDM_VSA_FSW(unittest.TestCase):
         extra = self.driver.vsa_get_extra('xcorr')
         self.assertEqual(extra, 'OFDM EVM XCORR')
 
+    def test_vsa_get_extra_ACLR_RMS(self):
+        """Test vsa_get_extra returns a string with the expected value."""
+        extra = self.driver.vsa_get_extra('ACLR_RMS')
+        self.assertEqual(extra, 'OFDM EVM ACLR_RMS')
+
+    def test_vsa_get_extra_XCORR_RMS(self):
+        """Test vsa_get_extra returns a string with the expected value."""
+        extra = self.driver.vsa_get_extra('XCORR_RMS')
+        self.assertEqual(extra, 'OFDM EVM XCORR_RMS')
+
     def test_vsa_get_waveform_info(self):
         """Test construction of OFDM info string."""
         info = self.driver.vsa_get_waveform_info()
