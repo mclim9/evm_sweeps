@@ -1,7 +1,7 @@
 from helper.utils import method_timer
 from helper.bench_config import BenchConfig
 from driver.base_vsg import VSGDriver
-
+import os
 
 class VSG_driver(VSGDriver):
     def __init__(self, VSG=None):
@@ -21,7 +21,9 @@ class VSG_driver(VSGDriver):
         return "SMW-OFDM"
 
     def vsg_save_state(self):
-        pass
+        self.Wavename = self.VSG.query(f":SOUR1:BB:OFDM:SETT:LOAD?")
+        SMW_IP = self.VSG.s.getpeername()[0]                            # Instr
+        os.system(f'start \\\\{SMW_IP}\\user')
 
     def vsg_set_frequency(self, freq: float) -> None:
         self.VSG.query(f":SOUR1:FREQ:CW {freq};*OPC?")          # SMW
