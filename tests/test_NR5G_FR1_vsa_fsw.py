@@ -30,11 +30,6 @@ class TestNR5G_FR1_VSA_FSW(unittest.TestCase):
 
         self.driver = VSA_driver()
 
-        # Note: vsa_set_frequency uses self.VSG which isn't defined in this class's __init__.
-        # We provide a mock here to allow testing that method.
-        self.mock_vsg = MagicMock()
-        self.driver.VSG = self.mock_vsg
-
     def tearDown(self):
         self.bench_patcher.stop()
 
