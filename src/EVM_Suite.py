@@ -30,9 +30,9 @@ def main() -> None:
     config = SweepConfig(
         # freq_arry=[int(2.4e9), int(5.0e9), int(6.0e9)],   # WiFi
         # freq_arry=[int(1.00e9), int(2.00e9), int(3.00e9), int(4.00e9), int(5.00e9), int(6.00e9), int(7.00e9), int(8.00e9)],        # FR1
-        freq_arry=[int(40e9)],                              # OFDM
+        freq_arry=[int(20e9), int(40e9)],                              # OFDM
         pwr_arry=list(range(-45, 15, 1)),
-        lvl_arry=['MAN'],                                   # MAN; LEV;
+        lvl_arry=['MAN', 'LEV'],                                   # MAN; LEV;
         output_dir=Path('test_results'),
         file_prefix='OFDM_864MHz_EVM',
         vsa_extra=None,
@@ -47,15 +47,10 @@ def main() -> None:
     # vsg.bw   = vsa.bw                 # 10; 50; 100
 
     runner = SweepRunner(vsa, vsg, config)
-    config.vsa_extra = "XCORR"          # IQNC; XCORR; ACLR_RMS; XCORR_RMS
-    runner.run()
+    # config.vsa_extra = "XCORR"          # IQNC; XCORR; ACLR_RMS; XCORR_RMS
+    # runner.run()
     config.vsa_extra = None             # IQNC; XCORR; ACLR_RMS; XCORR_RMS
     runner.run()
-
-    # Run w/ native VSA driver
-    # vsa = VSA_driver(bench.VSA_start())
-    # runner = SweepRunner(vsa, vsg, config)
-    # runner.run()
 
 
 if __name__ == '__main__':

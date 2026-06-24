@@ -51,4 +51,3 @@ coverage.json
 src/aa_*.py
 src/aa_send_SCPI.py
 src/helper/bench_config.ini
-src/aa_send_SCPI.py
