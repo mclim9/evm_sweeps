@@ -33,6 +33,7 @@ def get_ch_power(vsa):                                  # K575 Mode
     vsa.query(":INIT:IMM;*OPC?")                        # Update screen
     chPwr = vsa.queryFloat(':CALC:MARK:FUNC:BPOW:RES?')
     vsa.query(f":INST:SEL '{curr_App}';*OPC?")
+    # vsa.write(f":INST:SEL '{curr_App}';*OPC?")
     # vsa.clear_error()
     return chPwr
 
