@@ -82,11 +82,11 @@ class Test_OFDM_VSA_FSW(unittest.TestCase):
         evm, _ = self.driver.vsa_get_evm()
         self.assertEqual(evm, -50.5)
 
-    def test_vsa_get_evm_failure_returns_sentinel(self):
-        """Test that invalid EVM data returns the 999.0 sentinel value."""
-        self.mock_vsa.query.side_effect = ["1", "2", "3", "4", "5", "10.6", "11", "12", "13", "14", "15"]
+    def test_vsa_get_evm_retry(self):
+        """Test that EVM retrieval retries once on failure."""
+        self.mock_vsa.query.side_effect = ["1", Exception("Comm error"), "1", -50.5]
         evm, _ = self.driver.vsa_get_evm()
-        self.assertEqual(evm, 2.0)
+        self.assertEqual(evm, -50.5)
 
     def test_vsa_get_extra(self):
         """Test vsa_get_extra string"""

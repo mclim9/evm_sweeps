@@ -14,8 +14,8 @@ class VSA_driver(VSADriver):
         self.cpl2 = 16                  # CP Length 2
         self.dft = 1                    # DFT-s-OFDM on/off
         self.dft_ignore = 1             # DFT-s-OFDM Ignore don't care
-        # self.xmsl = '/home/instrument/LEO_WV_example.xml'       # VSA-KM state filename
-        self.xmsl = 'C:\R_S\instr\LEO_WV_example.xml'       # VSA-K96 state filename
+        # self.xmsl = '/home/instrument/LEO_WV_example.xml'     # VSA-KM state filename
+        self.xmsl = 'C:\R_S\instr\LEO_WV_example.xml'           # VSA-K96 state filename
 
     @method_timer
     def vsa_configure(self) -> None:

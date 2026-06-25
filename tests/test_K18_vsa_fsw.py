@@ -92,10 +92,7 @@ class TestK18VSAFSW(unittest.TestCase):
 
     def test_vsa_get_evm_retry(self):
         """Test that EVM retrieval retries once on failure."""
-        self.mock_vsa.query.return_value = "1"
-        # Fail the first attempt, succeed on the second
-        self.mock_vsa.queryFloat.side_effect = [Exception("Comm error"), -50.5]
-
+        self.mock_vsa.query.side_effect = ["1", "1", "1", Exception("Comm error"), "1", "1", "1", -50.5]
         evm, _ = self.driver.vsa_get_evm()
         self.assertEqual(evm, -50.5)
 

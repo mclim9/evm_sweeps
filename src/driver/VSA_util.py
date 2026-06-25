@@ -8,6 +8,7 @@ if SRC_DIR not in sys.path:
     sys.path.insert(0, SRC_DIR)
 
 from helper.bench_config import BenchConfig
+
 def get_ch_power_init(vsa):
     curr_App = vsa.query(":INST:SEL?")              # Current App
     vsa.write(":INST:DEL 'ChPwr'")                  # Delete ch if exist
