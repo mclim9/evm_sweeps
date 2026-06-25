@@ -94,7 +94,6 @@ class TestWiFiVSAFSW(unittest.TestCase):
         """Test vsa_get_extra returns a string with the expected value."""
         extra = self.driver.vsa_get_extra('IQNC')
         self.assertEqual(extra, 'WiFi EVM IQNC')
-        pass
 
     def test_vsa_get_extra_XCORR(self):
         """Test vsa_get_extra returns a string with the expected value."""
@@ -103,9 +102,7 @@ class TestWiFiVSAFSW(unittest.TestCase):
 
     def test_vsa_get_waveform_info(self):
         """Test construction of LTE info string."""
-        self.mock_vsa.query.side_effect = [
-            "6000000000", "11AC", "160", "MCS13", "1234"
-        ]
+        self.mock_vsa.query.side_effect = ["6000000000", "11AC", "160", "MCS13", "1234"]
         info = self.driver.vsa_get_waveform_info()
         self.assertIn("11AC", info)
         self.assertIn("160", info)
@@ -130,7 +127,7 @@ class TestWiFiVSAFSW(unittest.TestCase):
         """Test save state branch for MU direction."""
         # Sequence: *IDN?, Freq, Standard, PacketType/Dir, MCS, RU, *OPC?
         # Note: 802.11ax/be MU-PPDU implies Downlink
-        self.mock_vsa.query.side_effect = ["IDN", "6000000000", "PPDU", "MU", "MCS10", "RU242", "OK"]
+        self.mock_vsa.query.side_effect = ["IDN", "PPDU", "MU", "MCS10", "RU242", "OK"]
         self.mock_vsa.queryInt.return_value = 80000000
         self.mock_vsa.s.getpeername.return_value = ("192.168.1.50", 5025)
 
