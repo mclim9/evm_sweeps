@@ -147,6 +147,18 @@ class TestEVM_Sweep_PLOT_Bathtub(unittest.TestCase):
             result = p.convert_column_to_float(df, "B")
             self.assertEqual(list(result.columns), ["A"])
 
+    def test_convert_column_to_float_invalid_values_returns_original_df(self):
+        """Test that invalid numeric values are reported and left unchanged."""
+        with patch("EVM_Sweep_PLOT_Bathtub.plotter.read_data"):
+            p = plotter(filename="dummy.txt")
+            df = pd.DataFrame({"A": ["1", "not-a-number"]})
+
+            with patch("builtins.print") as mock_print:
+                result = p.convert_column_to_float(df, "A")
+
+            self.assertEqual(list(result["A"]), ["1", "not-a-number"])
+            self.assertGreaterEqual(mock_print.call_count, 2)
+
 
 if __name__ == "__main__":
     unittest.main()
