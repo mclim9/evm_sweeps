@@ -1,8 +1,11 @@
 """Unit tests for bench_config module"""
-import unittest
 from unittest.mock import MagicMock, patch, call
+import importlib
+import unittest
+import builtins
 import sys
 import os
+import types
 
 # Add src directory to path for imports
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -35,6 +38,29 @@ class TestBench(unittest.TestCase):
         """Clean up patches"""
         self.config_patcher.stop()
         self.socket_patcher.stop()
+
+    def test_import_uses_absolute_fallback_for_isocket(self):
+        """Test that bench_config falls back to the absolute iSocket import path."""
+        real_import = builtins.__import__
+        attempted_absolute_fallback = False
+
+        def fake_import(name, globals=None, locals=None, fromlist=(), level=0):
+            nonlocal attempted_absolute_fallback
+            if name == 'iSocket':
+                raise ImportError('direct import should fail')
+            if name == 'src.helper.iSocket':
+                attempted_absolute_fallback = True
+                stub_module = types.ModuleType('src.helper.iSocket')
+                stub_module.iSocket = MagicMock(name='iSocketStub')
+                return stub_module
+            return real_import(name, globals, locals, fromlist, level)
+
+        module = sys.modules['src.helper.bench_config']
+        with patch('builtins.__import__', side_effect=fake_import):
+            imported_module = importlib.reload(module)
+
+        self.assertTrue(attempted_absolute_fallback)
+        self.assertTrue(callable(imported_module.iSocket))
 
     def test_init_reads_config_file(self):
         """Test that __init__ reads configuration from .ini file"""
